@@ -111,7 +111,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   da = 2.f * (float) M_PI / teeth / 4.f;
 
-  unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4;
+  unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4 + 2;
   unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof(float);
   vertexCount = quadCount * TRIS_PER_QUAD * VERTICES_PER_TRI;
   unsigned int VBOsize = vertexCount * VBOstride;
@@ -133,7 +133,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   /* draw front face */
   // glBegin(GL_QUAD_STRIP);
   unsigned int VBOpos = 0;
-  for (i = 0; i < teeth; i++) {
+  for (i = 0; i <= teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
     float v1x, v1y, v1z, v2x, v2y, v2z;
     float v3x = r0 * (float) cos(angle);
@@ -157,7 +157,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       v2y = r1 * (float) sin(angle);
       v2z = width * 0.5f;
     }
-    addQuad(VBOdata + VBOpos, nx, ny, nz, 1., 1., 0.,
+    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
       v1x, v1y, v1z, v2x, v2y, v2z,
       v3x, v3y, v3z, v4x, v4y, v4z);
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
@@ -205,28 +205,40 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   /* draw back face */
   // glBegin(GL_QUAD_STRIP);
-  for (i = 0; i < teeth; i++) {
+  for (i = 0; i <= teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
+    float v1x, v1y, v1z, v2x, v2y, v2z;
+    float v3x = r1 * (float) cos(angle + 3 * da);
+    float v3y = r1 * (float) sin(angle + 3 * da);
+    float v3z = -width * 0.5f;
+    float v4x = r0 * (float) cos(angle);
+    float v4y = r0 * (float) sin(angle);
+    float v4z = -width * 0.5f;
     if (i > 0) {
-      addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-              prev1x, prev1y, prev1z,
-              prev2x, prev2y, prev2z,
-              r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
-              r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+      v1x = prev1x;
+      v1y = prev1y;
+      v1z = prev1z;
+      v2x = prev2x;
+      v2y = prev2y;
+      v2z = prev2z;
     } else {
-      addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-              r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
-              r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
-              r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
-              r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+      v1x = r1 * (float) cos(angle);
+      v1y = r1 * (float) sin(angle);
+      v1z = -width * 0.5f;
+      v2x = r0 * (float) cos(angle);
+      v2y = r0 * (float) sin(angle);
+      v2z = -width * 0.5f;
     }
+    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+      v1x, v1y, v1z, v2x, v2y, v2z,
+      v3x, v3y, v3z, v4x, v4y, v4z);
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
-    prev1x = r1 * (float) cos(angle + 3 * da);
-    prev1y = r1 * (float) sin(angle + 3 * da);
-    prev1z = -width * 0.5f;
-    prev2x = r0 * (float) cos(angle);
-    prev2y = r0 * (float) sin(angle);
-    prev2z = width * 0.5f;
+    prev1x = v3x;
+    prev1y = v3y;
+    prev1z = v3z;
+    prev2x = v4x;
+    prev2y = v4y;
+    prev2z = v4z;
     /*
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
@@ -385,6 +397,7 @@ static GLint shaderProgram, vertexShader, fragmentShader;
 static GLint uniformProjection, uniformModel, uniformView;
 static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
+static bool wireframe = false;
 
 void add_model(model_t* model)
 {
@@ -507,6 +520,17 @@ void key( GLFWwindow* window, int k, int s, int action, int mods )
     break;
   case GLFW_KEY_RIGHT:
     view_roty -= 5.0;
+    break;
+  case GLFW_KEY_V:
+    if (!wireframe)
+    {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+    wireframe = !wireframe;
     break;
   default:
     return;
