@@ -19,5 +19,5 @@ void main() {
 	vec3 lightDiff = normalize(aPos - lightPos);
 	float lightIntensity = dot(lightDiff, aNrm);
 	lightColour = vec4(aCol, 1.) * lightIntensity;
-	gl_Position = aPos * modelView * projection;
+	gl_Position = vec4(aPos, 1.) * model * view * projection;
 }

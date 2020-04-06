@@ -57,8 +57,8 @@
 #define VERTICES_PER_TRI 3
 // Position, normal, and RGB colour as 3-component vectors
 #define VERTEX_ATTRIBUTES 9
-// Front face, front teeth, back face, back teeth, teeth, central hole
-#define MODEL_PIECE_COUNT 6
+// Front face, front teeth, back face, back teeth, central hole
+#define MODEL_PIECE_COUNT 5
 
 void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
   float nz, float r, float g, float b)
@@ -80,22 +80,22 @@ void addQuad(float* buffer,
              float v4x, float v4y, float v4z)
 {
   addVertex(buffer, v1x, v1y, v1z, nx, ny, nz, r, g, b);
-  buffer += sizeof float * VERTEX_ATTRIBUTES;
+  buffer += VERTEX_ATTRIBUTES;
   addVertex(buffer, v2x, v2y, v2z, nx, ny, nz, r, g, b);
-  buffer += sizeof float * VERTEX_ATTRIBUTES;
+  buffer += VERTEX_ATTRIBUTES;
   addVertex(buffer, v3x, v3y, v3z, nx, ny, nz, r, g, b);
-  buffer += sizeof float * VERTEX_ATTRIBUTES;
+  buffer += VERTEX_ATTRIBUTES;
+  addVertex(buffer, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  buffer += VERTEX_ATTRIBUTES;
+  addVertex(buffer, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+  buffer += VERTEX_ATTRIBUTES;
   addVertex(buffer, v4x, v4y, v4z, nx, ny, nz, r, g, b);
-  buffer += sizeof float * VERTEX_ATTRIBUTES;
-  addVertex(buffer, v3x, v3y, v3z, nx, ny, nz, r, g, b);
-  buffer += sizeof float * VERTEX_ATTRIBUTES;
-  addVertex(buffer, v2x, v2y, v2z, nx, ny, nz, r, g, b);
 }
 
-static unsigned int
+static void
 gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   GLint teeth, GLfloat tooth_depth, GLfloat* rgba, GLuint& VBO, GLuint& VAO,
-  GLint& triCount)
+  GLuint& triCount)
 {
   GLint i;
   GLfloat r0, r1, r2;
@@ -108,25 +108,14 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   da = 2.f * (float) M_PI / teeth / 4.f;
 
-  unsigned int VAO, VBO;
-  unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4 + 1;
-  unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof float;
+  unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4;
+  unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof(float);
   triCount = quadCount * TRIS_PER_QUAD;
   unsigned int VBOsize = VERTICES_PER_TRI * triCount * VBOstride;
   float* VBOdata = (float*) malloc(VBOsize);
 
   glGenBuffers(1, &VBO);
-  // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
   glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)3 * sizeof float);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)6 * sizeof float);
-  glEnableVertexAttribArray(2);
-  glBindVertexArray(0);
 
   // glShadeModel(GL_FLAT); // flat or smooth shading depends on normals
 
@@ -148,7 +137,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
             r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
             r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     /*
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
@@ -170,7 +159,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     /*
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
     glVertex3f(r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f);
@@ -181,9 +170,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   // glEnd();
 
   // glNormal3f(0.0, 0.0, -1.0);
-  float nx = 0.;
-  float ny = 0.;
-  float nz = -1.;
+  nx = 0.;
+  ny = 0.;
+  nz = -1.;
 
   /* draw back face */
   // glBegin(GL_QUAD_STRIP);
@@ -194,7 +183,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
       r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     /*
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
@@ -217,7 +206,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f,
       r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     /*
     glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
     glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
@@ -250,7 +239,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
     nx = (float) cos(angle);
     ny = (float) sin(angle);
@@ -262,7 +251,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     u = r1 * (float) cos(angle + 3 * da) - r2 * (float) cos(angle + 2 * da);
     v = r1 * (float) sin(angle + 3 * da) - r2 * (float) sin(angle + 2 * da);
     // glNormal3f(v, -u, 0.f);
@@ -274,7 +263,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
     // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
     // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
@@ -286,15 +275,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
       r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), width * 0.5f,
       r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), -width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
   }
 
-  addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-    r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
-    r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
-    r1 * (float) cos(0), r1 * (float) sin(0), width * 0.5f,
-    r1 * (float) cos(0), r1 * (float) sin(0), -width * 0.5f);
-  VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
   // glVertex3f(r1 * (float) cos(0), r1 * (float) sin(0), width * 0.5f);
   // glVertex3f(r1 * (float) cos(0), r1 * (float) sin(0), -width * 0.5f);
 
@@ -304,7 +287,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   /* draw inside radius cylinder */
   // glBegin(GL_QUAD_STRIP);
-  for (i = 1; i < teeth; i++) {
+  for (i = 0; i < teeth; i++) {
     float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
     angle = i * 2.f * (float) M_PI / teeth;
     // glNormal3f(-(float) cos(angle), -(float) sin(angle), 0.f);
@@ -316,7 +299,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
       r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), -width * 0.5f,
       r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), width * 0.5f);
-    VBOpos += VBOstride * VERTICES_PER_TRI * TRIS_PER_QUAD;
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
     // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
   }
@@ -324,7 +307,17 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, VBOsize, VBOdata, GL_STATIC_DRAW);
-  return VAO;
+
+  glBindVertexArray(VAO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) 0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) (3 * sizeof(float)) );
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) (6 * sizeof(float)) );
+  glEnableVertexAttribArray(2);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 
@@ -342,6 +335,7 @@ static void draw(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glm::mat4 view(1.0f);
+  glm::translate(view, glm::vec3(0.0, 0.0, -20.0));
   glm::rotate(view, view_rotx, glm::vec3(1.0, 0.0, 0.0));
   glm::rotate(view, view_roty, glm::vec3(0.0, 1.0, 0.0));
   glm::rotate(view, view_rotz, glm::vec3(0.0, 0.0, 1.0));
@@ -351,8 +345,7 @@ static void draw(void)
   glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
   glm::mat4 model(1.0);
-  glm::translate(model, 0.0, 0.0, -20.0);
-  glm::translate(model, -3.0, -2.0, 0.0);
+  glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
   glm::rotate(model, angle, glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear1B);
@@ -360,8 +353,7 @@ static void draw(void)
   glDrawArrays(GL_TRIANGLES, 0, gear1S);
 
   model = glm::mat4(1.0);
-  glm::translate(model, 0.0, 0.0, -20.0);
-  glm::translate(model, 3.1, -2.0, 0.0);
+  glm::translate(model, glm::vec3(3.1, -2.0, 0.0));
   glm::rotate(model, -2.f * angle - 9.f, glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear2B);
@@ -369,13 +361,12 @@ static void draw(void)
   glDrawArrays(GL_TRIANGLES, 0, gear2S);
 
   model = glm::mat4(1.0);
-  glm::translate(model, 0.0, 0.0, -20.0);
-  glm::translate(model, -3.1, 4.2, 0.0);
+  glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
   glm::rotate(model, -2.f * angle - 25.f, glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-  glBindBuffer(GL_ARRAY_BUFFER, gear2B);
-  glBindVertexArray(gear2A);
-  glDrawArrays(GL_TRIANGLES, 0, gear2S);
+  glBindBuffer(GL_ARRAY_BUFFER, gear3B);
+  glBindVertexArray(gear3A);
+  glDrawArrays(GL_TRIANGLES, 0, gear3S);
   /*
   glPushMatrix();
     glRotatef(view_rotx, 1.0, 0.0, 0.0);
@@ -471,12 +462,12 @@ void reshape( GLFWwindow* window, int width, int height )
 static bool initShaders(GLfloat* lightPos)
 {
   char* vertexShaderSource;
-  unsigned int vertexShaderLength;
+  int vertexShaderLength;
   char* fragmentShaderSource;
-  unsigned int fragmentShaderLength;
+  int fragmentShaderLength;
   char compileError[1024];
-  unsigned int compileStatus = 0;
-  memset(compileError, 1024, 0);
+  int compileStatus = 0;
+  memset(compileError, 0, 1024);
 
   // Read the shader source files
   FILE* vsSourceFile = fopen("default.vert", "r");
@@ -488,9 +479,9 @@ static bool initShaders(GLfloat* lightPos)
 
   fseek(vsSourceFile, 0, SEEK_END);
   vertexShaderLength = ftell(vsSourceFile);
-  vertexShaderSource = new char[fileSize];
+  vertexShaderSource = new char[vertexShaderLength];
   fseek(vsSourceFile, 0, SEEK_SET);
-  fread(vertexShaderSource, 1, fileSize, vsSourceFile);
+  fread(vertexShaderSource, 1, vertexShaderLength, vsSourceFile);
   
   FILE* fsSourceFile = fopen("default.frag", "r");
   if (!fsSourceFile)
@@ -501,14 +492,14 @@ static bool initShaders(GLfloat* lightPos)
 
   fseek(fsSourceFile, 0, SEEK_END);
   fragmentShaderLength = ftell(fsSourceFile);
-  fragmentShaderSource = new char[fileSize];
+  fragmentShaderSource = new char[fragmentShaderLength];
   fseek(fsSourceFile, 0, SEEK_SET);
-  fread(fragmentShaderSource, 1, fileSize, fsSourceFile);
+  fread(fragmentShaderSource, 1, fragmentShaderLength, fsSourceFile);
 
   // Compile the shaders
   shaderProgram = glCreateProgram();
   vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, vertexShaderSource, &vertexShaderLength);
+  glShaderSource(vertexShader, 1, &vertexShaderSource, &vertexShaderLength);
   glCompileShader(vertexShader);
   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
   if (compileStatus == GL_FALSE)
@@ -519,7 +510,7 @@ static bool initShaders(GLfloat* lightPos)
   }
 
   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, fragmentShaderSource, &fragmentShaderLength);
+  glShaderSource(fragmentShader, 1, &fragmentShaderSource, &fragmentShaderLength);
   glCompileShader(fragmentShader);
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileStatus);
   if (compileStatus == GL_FALSE)
@@ -535,7 +526,7 @@ static bool initShaders(GLfloat* lightPos)
   glLinkProgram(shaderProgram);
 
   GLint uniformLightPos = glGetUniformLocation(shaderProgram, "lightPos");
-  glUniform3f(uniformLightPos, lightPos);
+  glUniform3f(uniformLightPos, lightPos[0], lightPos[1], lightPos[2]);
   uniformProjection = glGetUniformLocation(shaderProgram, "projection");
   uniformModel = glGetUniformLocation(shaderProgram, "model");
   uniformView = glGetUniformLocation(shaderProgram, "view");
@@ -557,12 +548,9 @@ static void init(void)
   // glEnable(GL_CULL_FACE);
   // glEnable(GL_LIGHTING);
   // glEnable(GL_LIGHT0);
-  // glEnable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST);
 
   /* make the gears */
-  // gear1 = glGenLists(1);
-  // glNewList(gear1, GL_COMPILE);
-  // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, red);
   gear(1.f, 4.f, 1.f, 20, 0.7f, red, gear1B, gear1A, gear1S);
   // glEndList();
 
@@ -594,8 +582,11 @@ int main(int argc, char *argv[])
         exit( EXIT_FAILURE );
     }
 
-    glfwWindowHint(GLFW_DEPTH_BITS, 16);
-    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    // glfwWindowHint(GLFW_DEPTH_BITS, 16);
+    // glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow( 300, 300, "Gears", NULL, NULL );
     if (!window)
@@ -610,7 +601,7 @@ int main(int argc, char *argv[])
     glfwSetKeyCallback(window, key);
 
     glfwMakeContextCurrent(window);
-    gladLoadGL(glfwGetProcAddress);
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval( 1 );
 
     glfwGetFramebufferSize(window, &width, &height);
