@@ -79,28 +79,31 @@ void addQuad(float* buffer,
              float v3x, float v3y, float v3z,
              float v4x, float v4y, float v4z)
 {
-  addVertex(buffer, v1x, v1y, v1z, nx, ny, nz, r, g, b);
-  buffer += VERTEX_ATTRIBUTES;
-  addVertex(buffer, v2x, v2y, v2z, nx, ny, nz, r, g, b);
-  buffer += VERTEX_ATTRIBUTES;
-  addVertex(buffer, v3x, v3y, v3z, nx, ny, nz, r, g, b);
-  buffer += VERTEX_ATTRIBUTES;
-  addVertex(buffer, v2x, v2y, v2z, nx, ny, nz, r, g, b);
-  buffer += VERTEX_ATTRIBUTES;
-  addVertex(buffer, v3x, v3y, v3z, nx, ny, nz, r, g, b);
-  buffer += VERTEX_ATTRIBUTES;
-  addVertex(buffer, v4x, v4y, v4z, nx, ny, nz, r, g, b);
+  unsigned int pos = 0;
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
 }
 
 static void
 gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   GLint teeth, GLfloat tooth_depth, GLfloat* rgba, GLuint& VBO, GLuint& VAO,
-  GLuint& triCount)
+  GLuint& vertexCount)
 {
   GLint i;
   GLfloat r0, r1, r2;
   GLfloat angle, da;
   GLfloat u, v, len;
+  // Emulate GL_QUAD_STRIP
+  GLfloat prev1x = 0, prev1y = 0, prev1z = 0, prev2x = 0, prev2y = 0, prev2z = 0;
 
   r0 = inner_radius;
   r1 = outer_radius - tooth_depth / 2.f;
@@ -110,8 +113,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4;
   unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof(float);
-  triCount = quadCount * TRIS_PER_QUAD;
-  unsigned int VBOsize = VERTICES_PER_TRI * triCount * VBOstride;
+  vertexCount = quadCount * TRIS_PER_QUAD * VERTICES_PER_TRI;
+  unsigned int VBOsize = vertexCount * VBOstride;
   float* VBOdata = (float*) malloc(VBOsize);
 
   glGenBuffers(1, &VBO);
@@ -132,12 +135,38 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   unsigned int VBOpos = 0;
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-            r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
-            r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
+    float v1x, v1y, v1z, v2x, v2y, v2z;
+    float v3x = r0 * (float) cos(angle);
+    float v3y = r0 * (float) sin(angle);
+    float v3z = width * 0.5f;
+    float v4x = r1 * (float) cos(angle + 3 * da);
+    float v4y = r1 * (float) sin(angle + 3 * da);
+    float v4z = width * 0.5f;
+    if (i > 0) {
+      v1x = prev1x;
+      v1y = prev1y;
+      v1z = prev1z;
+      v2x = prev2x;
+      v2y = prev2y;
+      v2z = prev2z;
+    } else {
+      v1x = r0 * (float) cos(angle);
+      v1y = r0 * (float) sin(angle);
+      v1z = width * 0.5f;
+      v2x = r1 * (float) cos(angle);
+      v2y = r1 * (float) sin(angle);
+      v2z = width * 0.5f;
+    }
+    addQuad(VBOdata + VBOpos, nx, ny, nz, 1., 1., 0.,
+      v1x, v1y, v1z, v2x, v2y, v2z,
+      v3x, v3y, v3z, v4x, v4y, v4z);
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
+    prev1x = v3x;
+    prev1y = v3y;
+    prev1z = v3z;
+    prev2x = v4x;
+    prev2y = v4y;
+    prev2z = v4z;
     /*
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
@@ -178,12 +207,26 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   // glBegin(GL_QUAD_STRIP);
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-      r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
-      r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
-      r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
-      r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+    if (i > 0) {
+      addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+              prev1x, prev1y, prev1z,
+              prev2x, prev2y, prev2z,
+              r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
+              r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+    } else {
+      addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+              r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
+              r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
+              r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
+              r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+    }
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
+    prev1x = r1 * (float) cos(angle + 3 * da);
+    prev1y = r1 * (float) sin(angle + 3 * da);
+    prev1z = -width * 0.5f;
+    prev2x = r0 * (float) cos(angle);
+    prev2y = r0 * (float) sin(angle);
+    prev2z = width * 0.5f;
     /*
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
@@ -320,6 +363,21 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   glBindVertexArray(0);
 }
 
+struct model_t {
+  GLuint array;
+  GLuint buffer;
+  GLuint vertexCount;
+  glm::mat4 transform;
+};
+
+struct model_list_item_t {
+  model_list_item_t* next;
+  model_t* data;
+};
+
+struct model_list_t {
+  model_list_item_t* head;
+} models;
 
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
 static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
@@ -328,6 +386,27 @@ static GLint uniformProjection, uniformModel, uniformView;
 static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
 
+void add_model(model_t* model)
+{
+  if (!models.head)
+  {
+    model_list_item_t* current = new model_list_item_t;
+    current->data = model;
+    models.head = current;
+  }
+  else
+  {
+    model_list_item_t* current = models.head;
+    while (current->next != nullptr)
+    {
+      current = current->next;
+    }
+    current->next = new model_list_item_t;
+    current = current->next;
+    current->data = model;
+  }
+}
+
 /* OpenGL draw function & timing */
 static void draw(void)
 {
@@ -335,34 +414,33 @@ static void draw(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glm::mat4 view(1.0f);
-  glm::translate(view, glm::vec3(0.0, 0.0, -20.0));
-  glm::rotate(view, view_rotx, glm::vec3(1.0, 0.0, 0.0));
-  glm::rotate(view, view_roty, glm::vec3(0.0, 1.0, 0.0));
-  glm::rotate(view, view_rotz, glm::vec3(0.0, 0.0, 1.0));
+  view = glm::translate(view, glm::vec3(0.0, 0.0, -20.0));
+  view = glm::rotate(view, glm::radians(view_rotx), glm::vec3(1.0, 0.0, 0.0));
+  view = glm::rotate(view, glm::radians(view_roty), glm::vec3(0.0, 1.0, 0.0));
+  view = glm::rotate(view, glm::radians(view_rotz), glm::vec3(0.0, 0.0, 1.0));
 
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
   glm::mat4 model(1.0);
-  glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
-  glm::rotate(model, angle, glm::vec3(0.0, 0.0, 1.0));
+  model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear1B);
   glBindVertexArray(gear1A);
   glDrawArrays(GL_TRIANGLES, 0, gear1S);
 
   model = glm::mat4(1.0);
-  glm::translate(model, glm::vec3(3.1, -2.0, 0.0));
-  glm::rotate(model, -2.f * angle - 9.f, glm::vec3(0.0, 0.0, 1.0));
+  model = glm::translate(model, glm::vec3(3.1, -2.0, 0.0));
+  model = glm::rotate(model, glm::radians(-2.f * angle - 9.f), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear2B);
   glBindVertexArray(gear2A);
   glDrawArrays(GL_TRIANGLES, 0, gear2S);
 
   model = glm::mat4(1.0);
-  glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
-  glm::rotate(model, -2.f * angle - 25.f, glm::vec3(0.0, 0.0, 1.0));
+  model = glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
+  model = glm::rotate(model, glm::radians(-2.f * angle - 25.f), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear3B);
   glBindVertexArray(gear3A);
@@ -456,6 +534,8 @@ void reshape( GLFWwindow* window, int width, int height )
   glTranslatef( 0.0, 0.0, -20.0 );
   */
   projection = glm::frustum(-xmax, xmax, -xmax * aspect, xmax * aspect, znear, zfar);
+  // float fov = (float) glm::radians(100.);
+  // projection = glm::perspective(fov, aspect, znear, zfar);
 }
 
 
@@ -544,8 +624,10 @@ static void init(void)
 
   initShaders(pos);
 
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   // glLightfv(GL_LIGHT0, GL_POSITION, pos);
-  // glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
   // glEnable(GL_LIGHTING);
   // glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
@@ -564,6 +646,7 @@ static void init(void)
   // glNewList(gear3, GL_COMPILE);
   // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
   gear(1.3f, 2.f, 0.5f, 10, 0.7f, blue, gear3B, gear3A, gear3S);
+  //gear(.25, .75, 0.125f, 10, 0.125f, blue, gear1B, gear1A, gear1S);
   // glEndList();
 
   // glEnable(GL_NORMALIZE);

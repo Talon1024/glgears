@@ -9,6 +9,7 @@ layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNrm;
 layout(location = 2) in vec3 aCol;
 
+out vec4 diffuse;
 out vec4 lightColour;
 // out float lightIntensity;
 
@@ -18,6 +19,8 @@ void main() {
 	// per-pixel lighting is really not necessary.
 	vec3 lightDiff = normalize(aPos - lightPos);
 	float lightIntensity = dot(lightDiff, aNrm);
+	diffuse = vec4(aCol, 1.);
 	lightColour = vec4(aCol, 1.) * lightIntensity;
-	gl_Position = vec4(aPos, 1.) * model * view * projection;
+	gl_Position = projection * view * model * vec4(aPos, 1.);
+	//gl_Position = vec4(aPos, 1.0);
 }
