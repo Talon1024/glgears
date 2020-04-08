@@ -130,8 +130,6 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   GLfloat r0, r1, r2;
   GLfloat angle, da;
   GLfloat u, v, len;
-  // Emulate GL_QUAD_STRIP
-  GLfloat prev1x = 0, prev1y = 0, prev1z = 0, prev2x = 0, prev2y = 0, prev2z = 0;
 
   r0 = inner_radius;
   r1 = outer_radius - tooth_depth / 2.f;
@@ -351,6 +349,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   }
   // glEnd();
 
+  // printf("VBOpos and VBOsize: %d %d\n", VBOpos * sizeof(float), VBOsize);
+
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, VBOsize, VBOdata, GL_STATIC_DRAW);
 
@@ -410,8 +410,8 @@ static GLint uniformProjection, uniformModel, uniformView, uniformLit;
 static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
 static bool wireframe = false;
-static bool lit = false;
-static bool rotategears = false;
+static bool lit = true;
+static bool rotategears = true;
 
 /* OpenGL draw function & timing */
 static void draw(void)

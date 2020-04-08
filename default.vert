@@ -11,7 +11,7 @@ layout(location = 2) in vec3 aCol;
 
 out vec4 diffuse;
 out vec4 lightColour;
-out vec3 vNrm;
+// out vec3 vNrm;
 // out float lightIntensity;
 
 void main() {
@@ -19,9 +19,9 @@ void main() {
 	// as per-pixel lighting. However, since the gears have no smooth faces,
 	// per-pixel lighting is really not necessary.
 	vec3 vPos = (model * vec4(aPos, 1.)).xyz;
-	mat3 rotation = mat3(model[0][0], model[0][1], model[0][2], model[1][0], model[1][1], model[1][2], model[2][0], model[2][1], model[2][2]);
-	vNrm = rotation * aNrm;
 	vec3 lightDiff = normalize(vPos - lightPos);
+	mat3 rotation = mat3(model[0][0], model[0][1], model[0][2], model[1][0], model[1][1], model[1][2], model[2][0], model[2][1], model[2][2]);
+	vec3 vNrm = rotation * aNrm;
 	float lightIntensity = dot(lightDiff, vNrm);
 	diffuse = vec4(aCol, 1.);
 	lightColour = vec4(aCol, 1.) * lightIntensity;
