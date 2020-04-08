@@ -80,6 +80,7 @@ void addQuad(float* buffer,
              float v4x, float v4y, float v4z)
 {
   unsigned int pos = 0;
+  /*
   addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
   pos += VERTEX_ATTRIBUTES;
   addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
@@ -91,12 +92,24 @@ void addQuad(float* buffer,
   addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
   pos += VERTEX_ATTRIBUTES;
   addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
+  */
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
 }
 
 static void
 gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   GLint teeth, GLfloat tooth_depth, GLfloat* rgba, GLuint& VBO, GLuint& VAO,
-  GLuint& vertexCount)
+  GLuint& vertexCount, GLuint& EBO)
 {
   GLint i;
   GLfloat r0, r1, r2;
@@ -109,7 +122,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   r1 = outer_radius - tooth_depth / 2.f;
   r2 = outer_radius + tooth_depth / 2.f;
 
-  da = 2.f * (float) M_PI / teeth / 4.f;
+  da = (float) M_PI / teeth / 2.;
 
   unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4 + 2;
   unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof(float);
@@ -133,11 +146,11 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   /* draw front face */
   // glBegin(GL_QUAD_STRIP);
   unsigned int VBOpos = 0;
-  for (i = 0; i <= teeth; i++) {
+  for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
     float v1x, v1y, v1z, v2x, v2y, v2z;
-    float v3x = r0 * (float) cos(angle);
-    float v3y = r0 * (float) sin(angle);
+    float v3x = r0 * (float) cos(angle + 3 * da);
+    float v3y = r0 * (float) sin(angle + 3 * da);
     float v3z = width * 0.5f;
     float v4x = r1 * (float) cos(angle + 3 * da);
     float v4y = r1 * (float) sin(angle + 3 * da);
@@ -186,8 +199,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
       r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
-      r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
-      r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
+      r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
+      r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     /*
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
@@ -259,8 +272,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
-      r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f,
-      r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
+      r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
+      r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     /*
     glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
@@ -346,8 +359,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
     angle = i * 2.f * (float) M_PI / teeth;
     // glNormal3f(-(float) cos(angle), -(float) sin(angle), 0.f);
-    nx = -(float) cos(angle);
     ny = -(float) sin(angle);
+    nx = -(float) cos(angle);
     nz = 0.f;
     addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
       r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
@@ -374,7 +387,7 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
-
+/*
 struct model_t {
   GLuint array;
   GLuint buffer;
@@ -390,14 +403,6 @@ struct model_list_item_t {
 struct model_list_t {
   model_list_item_t* head;
 } models;
-
-static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
-static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
-static GLint shaderProgram, vertexShader, fragmentShader;
-static GLint uniformProjection, uniformModel, uniformView;
-static GLfloat angle = 0.f;
-static glm::mat4 projection(1.0f);
-static bool wireframe = false;
 
 void add_model(model_t* model)
 {
@@ -419,6 +424,15 @@ void add_model(model_t* model)
     current->data = model;
   }
 }
+*/
+static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
+static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
+static GLint shaderProgram, vertexShader, fragmentShader;
+static GLint uniformProjection, uniformModel, uniformView, uniformLit;
+static GLfloat angle = 0.f;
+static glm::mat4 projection(1.0f);
+static bool wireframe = false;
+static bool lit = false;
 
 /* OpenGL draw function & timing */
 static void draw(void)
@@ -435,6 +449,7 @@ static void draw(void)
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+  glUniform1ui(uniformLit, lit);
 
   glm::mat4 model(1.0);
   model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
@@ -531,6 +546,9 @@ void key( GLFWwindow* window, int k, int s, int action, int mods )
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     wireframe = !wireframe;
+    break;
+  case GLFW_KEY_L:
+    lit = !lit;
     break;
   default:
     return;
@@ -634,6 +652,7 @@ static bool initShaders(GLfloat* lightPos)
   uniformProjection = glGetUniformLocation(shaderProgram, "projection");
   uniformModel = glGetUniformLocation(shaderProgram, "model");
   uniformView = glGetUniformLocation(shaderProgram, "view");
+  uniformLit = glGetUniformLocation(shaderProgram, "lit");
   // Done!
   return true;
 }
@@ -646,8 +665,11 @@ static void init(void)
   static GLfloat green[4] = {0.f, 0.8f, 0.2f, 1.f};
   static GLfloat blue[4] = {0.2f, 0.2f, 1.f, 1.f};
 
+  GLuint gear1E, gear2E, gear3E;
+
   initShaders(pos);
 
+  glLineWidth(2.0);
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   // glLightfv(GL_LIGHT0, GL_POSITION, pos);
   glEnable(GL_CULL_FACE);
@@ -657,19 +679,19 @@ static void init(void)
   glEnable(GL_DEPTH_TEST);
 
   /* make the gears */
-  gear(1.f, 4.f, 1.f, 20, 0.7f, red, gear1B, gear1A, gear1S);
+  gear(1.f, 4.f, 1.f, 20, 0.7f, red, gear1B, gear1A, gear1S, gear1E);
   // glEndList();
 
   // gear2 = glGenLists(1);
   // glNewList(gear2, GL_COMPILE);
   // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, green);
-  gear(0.5f, 2.f, 2.f, 10, 0.7f, green, gear2B, gear2A, gear2S);
+  gear(0.5f, 2.f, 2.f, 10, 0.7f, green, gear2B, gear2A, gear2S, gear2E);
   // glEndList();
 
   // gear3 = glGenLists(1);
   // glNewList(gear3, GL_COMPILE);
   // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-  gear(1.3f, 2.f, 0.5f, 10, 0.7f, blue, gear3B, gear3A, gear3S);
+  gear(1.3f, 2.f, 0.5f, 10, 0.7f, blue, gear3B, gear3A, gear3S, gear3E);
   //gear(.25, .75, 0.125f, 10, 0.125f, blue, gear1B, gear1A, gear1S);
   // glEndList();
 
