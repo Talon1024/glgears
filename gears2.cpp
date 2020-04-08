@@ -406,7 +406,7 @@ void add_model(model_t* model)
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
 static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
 static GLint shaderProgram, vertexShader, fragmentShader;
-static GLint uniformProjection, uniformModel, uniformView, uniformLit;
+static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit;
 static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
 static bool wireframe = false;
@@ -428,6 +428,7 @@ static void draw(void)
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+  glUniform3f(uniformLightPos, 5., 5., 10.);
   glUniform1ui(uniformLit, lit);
 
   glm::mat4 model(1.0);
@@ -565,7 +566,7 @@ void reshape( GLFWwindow* window, int width, int height )
 }
 
 
-static bool initShaders(GLfloat* lightPos)
+static bool initShaders()
 {
   char* vertexShaderSource;
   int vertexShaderLength;
@@ -631,8 +632,7 @@ static bool initShaders(GLfloat* lightPos)
   glAttachShader(shaderProgram, fragmentShader);
   glLinkProgram(shaderProgram);
 
-  GLint uniformLightPos = glGetUniformLocation(shaderProgram, "lightPos");
-  glUniform3f(uniformLightPos, lightPos[0], lightPos[1], lightPos[2]);
+  uniformLightPos = glGetUniformLocation(shaderProgram, "lightPos");
   uniformProjection = glGetUniformLocation(shaderProgram, "projection");
   uniformModel = glGetUniformLocation(shaderProgram, "model");
   uniformView = glGetUniformLocation(shaderProgram, "view");
@@ -651,7 +651,7 @@ static void init(void)
 
   GLuint gear1E, gear2E, gear3E;
 
-  initShaders(pos);
+  initShaders();
 
   glLineWidth(2.0);
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
