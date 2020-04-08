@@ -106,6 +106,21 @@ void addQuad(float* buffer,
   addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
 }
 
+void addTri(float* buffer,
+            float nx, float ny, float nz,
+            float r, float g, float b,
+             float v1x, float v1y, float v1z,
+             float v2x, float v2y, float v2z,
+             float v3x, float v3y, float v3z)
+{
+  unsigned int pos = 0;
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  pos += VERTEX_ATTRIBUTES;
+  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+}
+
 static void
 gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   GLint teeth, GLfloat tooth_depth, GLfloat* rgba, GLuint& VBO, GLuint& VAO,
@@ -124,9 +139,10 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   da = (float) M_PI / teeth / 2.;
 
-  unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4 + 2;
+  unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4;
+  unsigned int extraTriCount = teeth * 2;
   unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof(float);
-  vertexCount = quadCount * TRIS_PER_QUAD * VERTICES_PER_TRI;
+  vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
   unsigned int VBOsize = vertexCount * VBOstride;
   float* VBOdata = (float*) malloc(VBOsize);
 
@@ -148,38 +164,19 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   unsigned int VBOpos = 0;
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    float v1x, v1y, v1z, v2x, v2y, v2z;
-    float v3x = r0 * (float) cos(angle + 3 * da);
-    float v3y = r0 * (float) sin(angle + 3 * da);
-    float v3z = width * 0.5f;
-    float v4x = r1 * (float) cos(angle + 3 * da);
-    float v4y = r1 * (float) sin(angle + 3 * da);
-    float v4z = width * 0.5f;
-    if (i > 0) {
-      v1x = prev1x;
-      v1y = prev1y;
-      v1z = prev1z;
-      v2x = prev2x;
-      v2y = prev2y;
-      v2z = prev2z;
-    } else {
-      v1x = r0 * (float) cos(angle);
-      v1y = r0 * (float) sin(angle);
-      v1z = width * 0.5f;
-      v2x = r1 * (float) cos(angle);
-      v2y = r1 * (float) sin(angle);
-      v2z = width * 0.5f;
-    }
+    addTri(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+      r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
+      r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
+      r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f
+    );
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES;
     addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-      v1x, v1y, v1z, v2x, v2y, v2z,
-      v3x, v3y, v3z, v4x, v4y, v4z);
+        r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
+        r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
+        r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), width * 0.5f,
+        r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), width * 0.5f
+    );
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
-    prev1x = v3x;
-    prev1y = v3y;
-    prev1z = v3z;
-    prev2x = v4x;
-    prev2y = v4y;
-    prev2z = v4z;
     /*
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
@@ -218,40 +215,21 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   /* draw back face */
   // glBegin(GL_QUAD_STRIP);
-  for (i = 0; i <= teeth; i++) {
+  for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    float v1x, v1y, v1z, v2x, v2y, v2z;
-    float v3x = r1 * (float) cos(angle + 3 * da);
-    float v3y = r1 * (float) sin(angle + 3 * da);
-    float v3z = -width * 0.5f;
-    float v4x = r0 * (float) cos(angle);
-    float v4y = r0 * (float) sin(angle);
-    float v4z = -width * 0.5f;
-    if (i > 0) {
-      v1x = prev1x;
-      v1y = prev1y;
-      v1z = prev1z;
-      v2x = prev2x;
-      v2y = prev2y;
-      v2z = prev2z;
-    } else {
-      v1x = r1 * (float) cos(angle);
-      v1y = r1 * (float) sin(angle);
-      v1z = -width * 0.5f;
-      v2x = r0 * (float) cos(angle);
-      v2y = r0 * (float) sin(angle);
-      v2z = -width * 0.5f;
-    }
+    addTri(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+      r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
+      r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
+      r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
+    );
+    VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES;
     addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
-      v1x, v1y, v1z, v2x, v2y, v2z,
-      v3x, v3y, v3z, v4x, v4y, v4z);
+        r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), -width * 0.5f,
+        r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), -width * 0.5f,
+        r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
+        r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
+    );
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
-    prev1x = v3x;
-    prev1y = v3y;
-    prev1z = v3z;
-    prev2x = v4x;
-    prev2y = v4y;
-    prev2z = v4z;
     /*
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
     glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
@@ -356,8 +334,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   /* draw inside radius cylinder */
   // glBegin(GL_QUAD_STRIP);
   for (i = 0; i < teeth; i++) {
-    float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
     angle = i * 2.f * (float) M_PI / teeth;
+    float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
     // glNormal3f(-(float) cos(angle), -(float) sin(angle), 0.f);
     ny = -(float) sin(angle);
     nx = -(float) cos(angle);
@@ -433,6 +411,7 @@ static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
 static bool wireframe = false;
 static bool lit = false;
+static bool rotategears = false;
 
 /* OpenGL draw function & timing */
 static void draw(void)
@@ -473,6 +452,7 @@ static void draw(void)
   glBindBuffer(GL_ARRAY_BUFFER, gear3B);
   glBindVertexArray(gear3A);
   glDrawArrays(GL_TRIANGLES, 0, gear3S);
+
   /*
   glPushMatrix();
     glRotatef(view_rotx, 1.0, 0.0, 0.0);
@@ -505,7 +485,8 @@ static void draw(void)
 /* update animation parameters */
 static void animate(void)
 {
-  angle = 100.f * (float) glfwGetTime();
+  if (rotategears)
+    angle = 100.f * (float) glfwGetTime();
 }
 
 
@@ -549,6 +530,9 @@ void key( GLFWwindow* window, int k, int s, int action, int mods )
     break;
   case GLFW_KEY_L:
     lit = !lit;
+    break;
+  case GLFW_KEY_T:
+    rotategears = !rotategears;
     break;
   default:
     return;
