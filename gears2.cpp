@@ -335,14 +335,23 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     angle = i * 2.f * (float) M_PI / teeth;
     float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
     // glNormal3f(-(float) cos(angle), -(float) sin(angle), 0.f);
-    ny = -(float) sin(angle);
     nx = -(float) cos(angle);
+    ny = -(float) sin(angle);
     nz = 0.f;
     addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
       r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
       r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
       r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), -width * 0.5f,
       r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), width * 0.5f);
+    // Modify normal of next vertex
+    // Vertices 3 and 4 -> 2, 3, 4
+    *(VBOdata + VBOpos + VERTEX_ATTRIBUTES * 2 + 3) = -(float) cos(nextAngle);
+    *(VBOdata + VBOpos + VERTEX_ATTRIBUTES * 2 + 4) = -(float) sin(nextAngle);
+    // No need to modify normal Z coordinate
+    *(VBOdata + VBOpos + VERTEX_ATTRIBUTES * 3 + 3) = -(float) cos(nextAngle);
+    *(VBOdata + VBOpos + VERTEX_ATTRIBUTES * 3 + 4) = -(float) sin(nextAngle);
+    *(VBOdata + VBOpos + VERTEX_ATTRIBUTES * 4 + 3) = -(float) cos(nextAngle);
+    *(VBOdata + VBOpos + VERTEX_ATTRIBUTES * 4 + 4) = -(float) sin(nextAngle);
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES * TRIS_PER_QUAD;
     // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
     // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
@@ -364,6 +373,8 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
+
+  free(VBOdata);
 }
 /*
 struct model_t {
@@ -406,7 +417,7 @@ void add_model(model_t* model)
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
 static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
 static GLint shaderProgram, vertexShader, fragmentShader;
-static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit;
+static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit, uniformZoom;
 static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
 static bool wireframe = false;
@@ -428,7 +439,8 @@ static void draw(void)
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-  glUniform3f(uniformLightPos, 5., 5., 10.);
+  glUniform1f(uniformZoom, 1);
+  glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 10);
   glUniform1ui(uniformLit, lit);
 
   glm::mat4 model(1.0);
@@ -637,6 +649,7 @@ static bool initShaders()
   uniformModel = glGetUniformLocation(shaderProgram, "model");
   uniformView = glGetUniformLocation(shaderProgram, "view");
   uniformLit = glGetUniformLocation(shaderProgram, "lit");
+  uniformZoom = glGetUniformLocation(shaderProgram, "zoom");
   // Done!
   return true;
 }
@@ -644,7 +657,7 @@ static bool initShaders()
 /* program & OpenGL initialization */
 static void init(void)
 {
-  static GLfloat pos[4] = {5.f, 5.f, 10.f, 0.f};
+  // static GLfloat pos[4] = {5.f, 5.f, 10.f, 0.f};
   static GLfloat red[4] = {0.8f, 0.1f, 0.f, 1.f};
   static GLfloat green[4] = {0.f, 0.8f, 0.2f, 1.f};
   static GLfloat blue[4] = {0.2f, 0.2f, 1.f, 1.f};

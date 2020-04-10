@@ -4,6 +4,7 @@ uniform vec3 lightPos;
 uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
+uniform float zoom;
 
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNrm;
@@ -21,12 +22,14 @@ void main() {
 	vec3 vPos = (model * vec4(aPos, 1.)).xyz;
 	vec3 lightDiff = normalize(lightPos - vPos);
 	mat3 rotation = mat3(model[0][0], model[0][1], model[0][2], model[1][0], model[1][1], model[1][2], model[2][0], model[2][1], model[2][2]);
+	// vNrm = rotation * aNrm;
 	vec3 vNrm = rotation * aNrm;
 	float lightIntensity = dot(lightDiff, vNrm);
 	diffuse = vec4(aCol, 1.);
 	lightColour = vec4(aCol, 1.) * lightIntensity;
 	vec4 screenPos = projection * view * model * vec4(aPos, 1.);
 	distanceFromCamera = screenPos.z;
+	screenPos.w *= zoom;
 	gl_Position = screenPos;
-	//gl_Position = vec4(aPos, 1.0);
+	// gl_Position = vec4(aPos, zoom);
 }
