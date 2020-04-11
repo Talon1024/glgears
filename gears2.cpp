@@ -584,9 +584,7 @@ static bool initShaders()
   int vertexShaderLength;
   char* fragmentShaderSource;
   int fragmentShaderLength;
-  char compileError[1024];
   int compileStatus = 0;
-  memset(compileError, 0, 1024);
 
   // Read the shader source files
   FILE* vsSourceFile = fopen("default.vert", "r");
@@ -623,8 +621,12 @@ static bool initShaders()
   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
   if (compileStatus == GL_FALSE)
   {
-    glGetShaderInfoLog(vertexShader, 1024, nullptr, compileError);
+    int infoLength;
+    glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &infoLength);
+    char* compileError = (char*) malloc(infoLength);
+    glGetShaderInfoLog(vertexShader, infoLength, &infoLength, compileError);
     fputs(compileError, stderr);
+    free(compileError);
     return false;
   }
 
@@ -634,8 +636,12 @@ static bool initShaders()
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileStatus);
   if (compileStatus == GL_FALSE)
   {
-    glGetShaderInfoLog(fragmentShader, 1024, nullptr, compileError);
+    int infoLength;
+    glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &infoLength);
+    char* compileError = (char*) malloc(infoLength);
+    glGetShaderInfoLog(fragmentShader, infoLength, &infoLength, compileError);
     fputs(compileError, stderr);
+    free(compileError);
     return false;
   }
 
