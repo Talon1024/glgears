@@ -24,6 +24,5 @@
  *   - Upgraded to modern OpenGL 3.3 Core profile
  */
 
-void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
-  GLint teeth, GLfloat tooth_depth, GLfloat* rgba, GLuint& VBO, GLuint& VAO,
-  GLuint& vertexCount, GLuint& EBO);
+float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
+  GLfloat width, GLint teeth, GLfloat tooth_depth, GLfloat* rgba);

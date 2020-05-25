@@ -32,7 +32,7 @@
 #include <cmath>
 #include "glad.h"
 
-// Forward declarations for addVertex/Quad/Tri
+// Forward declarations for addVertex/Quad/Tri. These are only used in gear.cpp.
 
 void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
   float nz, float r, float g, float b);
@@ -51,15 +51,20 @@ void addTri(float* buffer,
              float v3x, float v3y, float v3z);
 
 /**
+  Generate geometry for a gear. Returns an interleaved vertex buffer with these
+  attributes:
 
-  Draw a gear wheel.  You'll probably want to call this function when
-  building a display list since we do a lot of trig here.
+  position: XYZ position of vertex (3 floats)
+  normal: XYZ vertex normal vector (3 floats)
+  colour: RGB vertex colour (3 floats)
+
+  The first argument, VBOsize, is passed by reference. It is set to the number
+  of floats in the buffer.
 
   Input:  inner_radius - radius of hole at center
           outer_radius - radius at center of teeth
           width - width of gear teeth - number of teeth
           tooth_depth - depth of tooth
-
  **/
 
 #define TRIS_PER_QUAD 2
@@ -69,34 +74,39 @@ void addTri(float* buffer,
 // Front face, front teeth, back face, back teeth, central hole
 #define MODEL_PIECE_COUNT 5
 
-void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
-  GLint teeth, GLfloat tooth_depth, GLfloat* rgba, GLuint& VBO, GLuint& VAO,
-  GLuint& vertexCount, GLuint& EBO)
+float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
+  GLfloat width, GLint teeth, GLfloat tooth_depth, GLfloat* rgba)
 {
   GLint i;
   GLfloat r0, r1, r2;
   GLfloat angle, da;
   GLfloat u, v, len;
 
+  // Distance from the center to the hole
   r0 = inner_radius;
+  // Distance from the center to the inside of the tooth
   r1 = outer_radius - tooth_depth / 2.f;
+  // Distance from the center to the outside of the tooth
   r2 = outer_radius + tooth_depth / 2.f;
 
   da = (float) M_PI / teeth / 2.;
 
+  // One quad for each piece of the model, and four additional quads for the
+  // outward faces of the teeth.
   unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4;
+  // Two pieces of the gear use "addTri"
   unsigned int extraTriCount = teeth * 2;
-  unsigned int VBOstride = VERTEX_ATTRIBUTES * sizeof(float);
+  // Number of bytes for each vertex
+  // unsigned int VBOstride = sizeof(float);
+  // Number of floats in the buffer
   vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
-  unsigned int VBOsize = vertexCount * VBOstride;
-  float* VBOdata = (float*) malloc(VBOsize);
-
-  glGenBuffers(1, &VBO);
-  glGenVertexArrays(1, &VAO);
+  unsigned int VBOsize = vertexCount * sizeof(float) * VERTEX_ATTRIBUTES;
+  float* VBOdata = new float[VBOsize];
 
   // glShadeModel(GL_FLAT); // flat or smooth shading depends on normals
 
   // glNormal3f(0.f, 0.f, 1.f);
+  // Emulate old OpenGL glNormal3f/glMaterialfv calls
   float nx = 0.;
   float ny = 0.;
   float nz = 1.;
@@ -307,21 +317,7 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
   // printf("VBOpos and VBOsize: %d %d\n", VBOpos * sizeof(float), VBOsize);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, VBOsize, VBOdata, GL_STATIC_DRAW);
-
-  glBindVertexArray(VAO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) 0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) (3 * sizeof(float)) );
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) (6 * sizeof(float)) );
-  glEnableVertexAttribArray(2);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  free(VBOdata);
+  return VBOdata;
 }
 
 
