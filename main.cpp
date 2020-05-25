@@ -326,6 +326,11 @@ static bool initShaders()
   return true;
 }
 
+void addGear(
+    GLuint& buffer, GLuint& array, GLuint& size, GLfloat innerRadius,
+    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth,
+    float* colour);
+
 /* program & OpenGL initialization */
 static void init(void)
 {
@@ -336,9 +341,6 @@ static void init(void)
 
   initShaders();
 
-  GLuint VBOstride = 9 * sizeof(float);
-  float* gearBuffer;
-
   glLineWidth(2.0);
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   // glLightfv(GL_LIGHT0, GL_POSITION, pos);
@@ -348,75 +350,40 @@ static void init(void)
   // glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
 
-  /* make the gears */
-  gearBuffer = gear(gear1S, 1.f, 4.f, 1.f, 20, 0.7f, red);
-
-  // Set up buffer and vertex array
-  glGenBuffers(1, &gear1B);
-  glGenVertexArrays(1, &gear1A);
-  // Upload buffer
-  glBindBuffer(GL_ARRAY_BUFFER, gear1B);
-  glBufferData(GL_ARRAY_BUFFER, gear1S * 9 * sizeof(float), gearBuffer, GL_STATIC_DRAW);
-  glBindVertexArray(gear1A);
-  // Set up vertex attributes
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) 0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-  // Release bindings
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-  // Free buffer, since it has been uploaded already
-  delete[] gearBuffer;
-
-  gearBuffer = gear(gear2S, 0.5f, 2.f, 2.f, 10, 0.7f, green);
-
-  // Set up buffer and vertex array
-  glGenBuffers(1, &gear2B);
-  glGenVertexArrays(1, &gear2A);
-  // Upload buffer
-  glBindBuffer(GL_ARRAY_BUFFER, gear2B);
-  glBufferData(GL_ARRAY_BUFFER, gear2S * 9 * sizeof(float), gearBuffer, GL_STATIC_DRAW);
-  glBindVertexArray(gear2A);
-  // Set up vertex attributes
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) 0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-  // Release bindings
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-  // Free buffer, since it has been uploaded already
-  delete[] gearBuffer;
-
-  gearBuffer = gear(gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f, blue);
-
-  // Set up buffer and vertex array
-  glGenBuffers(1, &gear3B);
-  glGenVertexArrays(1, &gear3A);
-  // Upload buffer
-  glBindBuffer(GL_ARRAY_BUFFER, gear3B);
-  glBufferData(GL_ARRAY_BUFFER, gear3S * 9 * sizeof(float), gearBuffer, GL_STATIC_DRAW);
-  glBindVertexArray(gear3A);
-  // Set up vertex attributes
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) 0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-  // Release bindings
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-  // Free buffer, since it has been uploaded already
-  delete[] gearBuffer;
-
+  addGear(gear1B, gear1A, gear1S, 1.f, 4.f, 1.f, 20, 0.7f, red);
+  addGear(gear2B, gear2A, gear2S, 0.5f, 2.f, 2.f, 10, 0.7f, green);
+  addGear(gear3B, gear3A, gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f, blue);
 }
 
+void addGear(
+    GLuint& buffer, GLuint& array, GLuint& size, GLfloat innerRadius,
+    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth,
+    float* colour)
+{
+    /* make the gears */
+    GLuint VBOstride = 9 * sizeof(float);
+    float* gearBuffer = gear(size, innerRadius, outerRadius, width, teeth, toothDepth, colour);
+
+    // Set up buffer and vertex array
+    glGenBuffers(1, &buffer);
+    glGenVertexArrays(1, &array);
+    // Upload buffer
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, size * 9 * sizeof(float), gearBuffer, GL_STATIC_DRAW);
+    glBindVertexArray(array);
+    // Set up vertex attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*) 0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    // Release bindings
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    // Free buffer, since it has been uploaded already
+    delete[] gearBuffer;
+}
 
 /* program entry */
 int main(int argc, char *argv[])
