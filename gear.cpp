@@ -100,7 +100,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
   // unsigned int VBOstride = sizeof(float);
   // Number of floats in the buffer
   vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
-  unsigned int VBOsize = vertexCount * sizeof(float) * VERTEX_ATTRIBUTES;
+  unsigned int VBOsize = vertexCount * VERTEX_ATTRIBUTES;
   float* VBOdata = new float[VBOsize];
 
   // glShadeModel(GL_FLAT); // flat or smooth shading depends on normals
