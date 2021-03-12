@@ -110,6 +110,7 @@ static void draw(void)
   glUniform1ui(uniformLit, lit);
 
   glm::mat4 model(1.0);
+  model = glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
   model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear1B);
@@ -117,7 +118,7 @@ static void draw(void)
   glDrawArrays(GL_TRIANGLES, 0, gear1S);
 
   model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3(3.1, -2.0, 0.0));
+  model = glm::translate(model, glm::vec3(3.1, -2., 0.0));
   model = glm::rotate(model, glm::radians(-2.f * angle - 9.f), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
   glBindBuffer(GL_ARRAY_BUFFER, gear2B);
