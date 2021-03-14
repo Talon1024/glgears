@@ -34,18 +34,16 @@
 
 // Forward declarations for addVertex/Quad/Tri. These are only used in gear.cpp.
 
-void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
+static void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
   float nz, float r, float g, float b);
-void addQuad(float* buffer,
+static void addQuad(float* buffer,
              float nx, float ny, float nz,
-             float r, float g, float b,
              float v1x, float v1y, float v1z,
              float v2x, float v2y, float v2z,
              float v3x, float v3y, float v3z,
              float v4x, float v4y, float v4z);
-void addTri(float* buffer,
+static void addTri(float* buffer,
             float nx, float ny, float nz,
-            float r, float g, float b,
              float v1x, float v1y, float v1z,
              float v2x, float v2y, float v2z,
              float v3x, float v3y, float v3z);
@@ -75,7 +73,7 @@ void addTri(float* buffer,
 #define MODEL_PIECE_COUNT 5
 
 float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
-  GLfloat width, GLint teeth, GLfloat tooth_depth, GLfloat* rgba)
+  GLfloat width, GLint teeth, GLfloat tooth_depth)
 {
   GLint i;
   GLfloat r0, r1, r2;
@@ -110,22 +108,19 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
   float nx = 0.;
   float ny = 0.;
   float nz = 1.;
-  float r = rgba[0];
-  float g = rgba[1];
-  float b = rgba[2];
 
   /* draw front face */
   // glBegin(GL_QUAD_STRIP);
   unsigned int VBOpos = 0;
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    addTri(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addTri(VBOdata + VBOpos, nx, ny, nz,
       r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
       r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f
     );
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
         r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
         r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
         r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), width * 0.5f,
@@ -148,7 +143,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
   da = 2.f * (float) M_PI / teeth / 4.f;
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
@@ -172,13 +167,13 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
   // glBegin(GL_QUAD_STRIP);
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
-    addTri(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addTri(VBOdata + VBOpos, nx, ny, nz,
       r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
       r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
     );
     VBOpos += VERTICES_PER_TRI * VERTEX_ATTRIBUTES;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
         r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), -width * 0.5f,
         r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), -width * 0.5f,
         r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
@@ -202,7 +197,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
   for (i = 0; i < teeth; i++) {
     angle = i * 2.f * (float) M_PI / teeth;
 
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
       r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
@@ -235,7 +230,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     nx = v;
     ny = -u;
     nz = 0.0;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
       r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
@@ -247,7 +242,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     nz = 0.0;
     // glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
     // glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f, // This line and the next are taken from the previous quad
       r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
@@ -259,7 +254,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     nx = v;
     ny = -u;
     nz = 0.0;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
       r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
@@ -271,7 +266,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     nx = (float) cos(angle);
     ny = (float) sin(angle);
     nz = 0.0;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
       r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
       r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), width * 0.5f,
@@ -295,7 +290,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     nx = -(float) cos(angle);
     ny = -(float) sin(angle);
     nz = 0.f;
-    addQuad(VBOdata + VBOpos, nx, ny, nz, r, g, b,
+    addQuad(VBOdata + VBOpos, nx, ny, nz,
       r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
       r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
       r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), -width * 0.5f,
@@ -321,7 +316,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
 }
 
 
-void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
+static void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
   float nz, float r, float g, float b)
 {
   // Position
@@ -332,9 +327,8 @@ void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
   buffer[6] = r;  buffer[7] = g;  buffer[8] = b;
 }
 
-void addQuad(float* buffer,
+static void addQuad(float* buffer,
              float nx, float ny, float nz,
-             float r, float g, float b,
              float v1x, float v1y, float v1z,
              float v2x, float v2y, float v2z,
              float v3x, float v3y, float v3z,
@@ -354,30 +348,29 @@ void addQuad(float* buffer,
   pos += VERTEX_ATTRIBUTES;
   addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
   */
-  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0, 0);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1, 0);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0, 1);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0, 1);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 1, 0);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0, 0);
 }
 
-void addTri(float* buffer,
+static void addTri(float* buffer,
             float nx, float ny, float nz,
-            float r, float g, float b,
              float v1x, float v1y, float v1z,
              float v2x, float v2y, float v2z,
              float v3x, float v3y, float v3z)
 {
   unsigned int pos = 0;
-  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0, 0);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1, 0);
   pos += VERTEX_ATTRIBUTES;
-  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
+  addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 0, 1);
 }

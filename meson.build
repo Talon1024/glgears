@@ -17,4 +17,4 @@ glad_dep = declare_dependency(sources: [glad_targ], link_args: ['-ldl'])
 
 deplist = [opengl, glfw, glad_dep]
 
-executable('gears', 'main.cpp', 'gear.cpp', include_directories: glm_path, dependencies: deplist)
+executable('gears', 'main.cpp', 'gear.cpp', 'input.cpp', include_directories: glm_path, dependencies: deplist)

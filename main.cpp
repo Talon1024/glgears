@@ -41,6 +41,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "gear.h"
+#include "input.h"
 
 /*
 struct model_t {
@@ -83,16 +84,14 @@ void add_model(model_t* model)
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
 static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
 static GLint shaderProgram, vertexShader, fragmentShader;
-static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit, uniformZoom;
+static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit, uniformZoom, uniformColour, uniformWireframe;
 static GLfloat angle = 0.f;
 static glm::mat4 projection(1.0f);
-static bool wireframe = false;
-static bool lit = true;
-static bool rotategears = true;
 
 /* OpenGL draw function & timing */
 static void draw(void)
 {
+  const InputStatus* input = Input::GetInputStatus();
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -107,12 +106,14 @@ static void draw(void)
   glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
   glUniform1f(uniformZoom, 1);
   glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 10);
-  glUniform1ui(uniformLit, lit);
+  glUniform1ui(uniformLit, input->lit);
+  glUniform1ui(uniformWireframe, input->wireframe);
 
   glm::mat4 model(1.0);
   model = glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
   model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+  glUniform3f(uniformColour, 0.8f, 0.1f, 0.f);
   glBindBuffer(GL_ARRAY_BUFFER, gear1B);
   glBindVertexArray(gear1A);
   glDrawArrays(GL_TRIANGLES, 0, gear1S);
@@ -121,6 +122,7 @@ static void draw(void)
   model = glm::translate(model, glm::vec3(3.1, -2., 0.0));
   model = glm::rotate(model, glm::radians(-2.f * angle - 9.f), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+  glUniform3f(uniformColour, 0.f, 0.8f, 0.2f);
   glBindBuffer(GL_ARRAY_BUFFER, gear2B);
   glBindVertexArray(gear2A);
   glDrawArrays(GL_TRIANGLES, 0, gear2S);
@@ -129,6 +131,7 @@ static void draw(void)
   model = glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
   model = glm::rotate(model, glm::radians(-2.f * angle - 25.f), glm::vec3(0.0, 0.0, 1.0));
   glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+  glUniform3f(uniformColour, 0.2f, 0.2f, 1.f);
   glBindBuffer(GL_ARRAY_BUFFER, gear3B);
   glBindVertexArray(gear3A);
   glDrawArrays(GL_TRIANGLES, 0, gear3S);
@@ -161,64 +164,28 @@ static void draw(void)
   */
 }
 
-
 /* update animation parameters */
 static void animate(void)
 {
-  if (rotategears)
+  const InputStatus* input = Input::GetInputStatus();
+  if (input->animate)
     angle = 100.f * (float) glfwGetTime();
-}
-
-
-/* change view angle, exit upon ESC */
-void key( GLFWwindow* window, int k, int s, int action, int mods )
-{
-  if( action != GLFW_PRESS ) return;
-
-  switch (k) {
-  case GLFW_KEY_Z:
-    if( mods & GLFW_MOD_SHIFT )
-      view_rotz -= 5.0;
+  if (input->up)
+    view_rotx += 2;
+  if (input->down)
+    view_rotx -= 2;
+  if (input->left)
+    view_roty += 2;
+  if (input->right)
+    view_roty -= 2;
+  if (input->z)
+  {
+    if (input->shift)
+      view_rotz -= 2;
     else
-      view_rotz += 5.0;
-    break;
-  case GLFW_KEY_ESCAPE:
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-    break;
-  case GLFW_KEY_UP:
-    view_rotx += 5.0;
-    break;
-  case GLFW_KEY_DOWN:
-    view_rotx -= 5.0;
-    break;
-  case GLFW_KEY_LEFT:
-    view_roty += 5.0;
-    break;
-  case GLFW_KEY_RIGHT:
-    view_roty -= 5.0;
-    break;
-  case GLFW_KEY_V:
-    if (!wireframe)
-    {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    else
-    {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-    wireframe = !wireframe;
-    break;
-  case GLFW_KEY_L:
-    lit = !lit;
-    break;
-  case GLFW_KEY_T:
-    rotategears = !rotategears;
-    break;
-  default:
-    return;
+      view_rotz += 2;
   }
 }
-
 
 /* new window size */
 void reshape( GLFWwindow* window, int width, int height )
@@ -323,22 +290,23 @@ static bool initShaders()
   uniformView = glGetUniformLocation(shaderProgram, "view");
   uniformLit = glGetUniformLocation(shaderProgram, "lit");
   uniformZoom = glGetUniformLocation(shaderProgram, "zoom");
+  uniformColour = glGetUniformLocation(shaderProgram, "colour");
+  uniformWireframe = glGetUniformLocation(shaderProgram, "wireframe");
   // Done!
   return true;
 }
 
 void addGear(
     GLuint& buffer, GLuint& array, GLuint& size, GLfloat innerRadius,
-    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth,
-    float* colour);
+    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth);
 
 /* program & OpenGL initialization */
 static void init(void)
 {
   // static GLfloat pos[4] = {5.f, 5.f, 10.f, 0.f};
-  static GLfloat red[4] = {0.8f, 0.1f, 0.f, 1.f};
-  static GLfloat green[4] = {0.f, 0.8f, 0.2f, 1.f};
-  static GLfloat blue[4] = {0.2f, 0.2f, 1.f, 1.f};
+  // static GLfloat red[4] = {0.8f, 0.1f, 0.f, 1.f};
+  // static GLfloat green[4] = {0.f, 0.8f, 0.2f, 1.f};
+  // static GLfloat blue[4] = {0.2f, 0.2f, 1.f, 1.f};
 
   initShaders();
 
@@ -351,15 +319,14 @@ static void init(void)
   // glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
 
-  addGear(gear1B, gear1A, gear1S, 1.f, 4.f, 1.f, 20, 0.7f, red);
-  addGear(gear2B, gear2A, gear2S, 0.5f, 2.f, 2.f, 10, 0.7f, green);
-  addGear(gear3B, gear3A, gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f, blue);
+  addGear(gear1B, gear1A, gear1S, 1.f, 4.f, 1.f, 20, 0.7f);
+  addGear(gear2B, gear2A, gear2S, 0.5f, 2.f, 2.f, 10, 0.7f);
+  addGear(gear3B, gear3A, gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f);
 }
 
 void addGear(
     GLuint& buffer, GLuint& array, GLuint& size, GLfloat innerRadius,
-    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth,
-    float* colour)
+    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth)
 {
     /* make the gears */
     // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
@@ -368,7 +335,7 @@ void addGear(
     void* posOffset = 0;
     void* nrmOffset = (void*)(3 * sizeof(float));
     void* colOffset = (void*)(6 * sizeof(float));
-    float* gearBuffer = gear(size, innerRadius, outerRadius, width, teeth, toothDepth, colour);
+    float* gearBuffer = gear(size, innerRadius, outerRadius, width, teeth, toothDepth);
 
     // Set up buffer and vertex array
     glGenBuffers(1, &buffer);
@@ -419,7 +386,7 @@ int main(int argc, char *argv[])
 
     // Set callback functions
     glfwSetFramebufferSizeCallback(window, reshape);
-    glfwSetKeyCallback(window, key);
+    glfwSetKeyCallback(window, Input::key);
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
