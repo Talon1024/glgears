@@ -23,6 +23,8 @@
  * Kevin Caccamo:
  *   - Upgraded to modern OpenGL 3.3 Core profile
  */
+#pragma once
+#include "glad.h"
 
 float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
   GLfloat width, GLint teeth, GLfloat tooth_depth);

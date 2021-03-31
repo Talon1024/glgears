@@ -24,6 +24,7 @@
  *   - Upgraded to modern OpenGL 3.3 Core profile
  */
 
+#include "glm/common.hpp"
 #if defined(_MSC_VER)
  // Make MS math.h define M_PI
  #define _USE_MATH_DEFINES
@@ -81,7 +82,8 @@ void add_model(model_t* model)
   }
 }
 */
-static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
+static GLfloat view_rotx = 20.f, view_roty = 30.f;
+// static GLfloat view_rotz = 0.f;
 static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
 static GLint shaderProgram, vertexShader, fragmentShader;
 static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit, uniformZoom, uniformColour, uniformWireframe;
@@ -91,7 +93,7 @@ static glm::mat4 projection(1.0f);
 /* OpenGL draw function & timing */
 static void draw(void)
 {
-  const InputStatus* input = Input::GetInputStatus();
+  const KeyInputState* input = Input::GetKeyState();
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -99,7 +101,7 @@ static void draw(void)
   view = glm::translate(view, glm::vec3(0.0, 0.0, -20.0));
   view = glm::rotate(view, glm::radians(view_rotx), glm::vec3(1.0, 0.0, 0.0));
   view = glm::rotate(view, glm::radians(view_roty), glm::vec3(0.0, 1.0, 0.0));
-  view = glm::rotate(view, glm::radians(view_rotz), glm::vec3(0.0, 0.0, 1.0));
+  // view = glm::rotate(view, glm::radians(view_rotz), glm::vec3(0.0, 0.0, 1.0));
 
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
@@ -167,24 +169,24 @@ static void draw(void)
 /* update animation parameters */
 static void animate(void)
 {
-  const InputStatus* input = Input::GetInputStatus();
+  const KeyInputState* input = Input::GetKeyState();
   if (input->animate)
     angle = 100.f * (float) glfwGetTime();
-  if (input->up)
+  /*
+  if (input->forward)
     view_rotx += 2;
-  if (input->down)
+  if (input->backward)
     view_rotx -= 2;
   if (input->left)
     view_roty += 2;
   if (input->right)
     view_roty -= 2;
-  if (input->z)
-  {
-    if (input->shift)
-      view_rotz -= 2;
-    else
-      view_rotz += 2;
-  }
+  */
+  const MouseInputState* mouse = Input::GetMouseState();
+  view_roty += mouse->moveX;
+  // view_roty = glm::clamp<GLfloat>(view_roty, -90, 90);
+  view_rotx += mouse->moveY;
+  view_rotx = glm::clamp<GLfloat>(view_rotx, -90, 90);
 }
 
 /* new window size */
@@ -386,7 +388,9 @@ int main(int argc, char *argv[])
 
     // Set callback functions
     glfwSetFramebufferSizeCallback(window, reshape);
-    glfwSetKeyCallback(window, Input::key);
+    glfwSetKeyCallback(window, Input::onKeyAction);
+    glfwSetCursorPosCallback(window, Input::onMouseMove);
+    glfwSetMouseButtonCallback(window, Input::onMouseButton);
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
