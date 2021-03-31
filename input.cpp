@@ -115,7 +115,7 @@ const MouseInputState* Input::GetMouseState()
   }
   state->moveX = curXPos - prevXPos;
   state->moveY = curYPos - prevYPos;
-  curXPos = prevXPos;
-  curYPos = prevYPos;
+  prevXPos = curXPos;
+  prevYPos = curYPos;
   return state;
 }
