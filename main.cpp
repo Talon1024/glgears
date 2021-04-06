@@ -179,7 +179,6 @@ static void animate(void)
     cameraHead.move(glm::vec3(.125, 0, 0));
   const MouseInputState* mouse = Input::GetMouseState();
   cameraHead.theta += mouse->moveX;
-  // view_roty = glm::clamp<GLfloat>(view_roty, -90, 90);
   cameraHead.phi -= mouse->moveY;
   cameraHead.phi = glm::clamp<GLfloat>(cameraHead.phi, -90, 90);
 }
@@ -345,6 +344,8 @@ static void onWindowResize(GLFWwindow* window, int width, int height)
 int main(int argc, char *argv[])
 {
     GLFWwindow* window;
+    const unsigned int windowWidth = 800;
+    const unsigned int windowHeight = 540;
 
     if( !glfwInit() )
     {
@@ -358,7 +359,7 @@ int main(int argc, char *argv[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow( 300, 300, "Gears", NULL, NULL );
+    window = glfwCreateWindow( windowWidth, windowHeight, "Gears", NULL, NULL );
     if (!window)
     {
         fprintf( stderr, "Failed to open GLFW window\n" );
@@ -374,7 +375,7 @@ int main(int argc, char *argv[])
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    onWindowResize(window, 300, 300);
+    onWindowResize(window, windowWidth, windowHeight);
     glfwSwapInterval( 1 );
 
     // Parse command-line options

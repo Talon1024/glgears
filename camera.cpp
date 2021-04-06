@@ -1,11 +1,8 @@
 #include "camera.h"
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/matrix.hpp"
-#include "glm/trigonometric.hpp"
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
+#include <glm/ext/quaternion_float.hpp>
 #include <GLFW/glfw3.h>
-// #include <iostream>
+// #include <cstdio>
 
 static glm::vec3 fromSpherical(float theta, float phi, bool degrees = true)
 {
@@ -23,46 +20,12 @@ static glm::vec3 fromSpherical(float theta, float phi, bool degrees = true)
 
 void CameraHead::move(glm::vec3 by)
 {
-	/*
-	yaw =
-	[ cos x, 0, sin x]
-	[ 0,     1, 0    ]
-	[-sin x, 0, cos x]
-
-	pitch =
-	[ 1,     0,      0]
-	[ 0, cos y, -sin y]
-	[ 0, sin y,  cos y]
-
-	matrix entry = dot product of row X and column Y
-	rotation =
-	[cos x    sin x * sin y    sin x * cos y]
-	[0        cos y            -sin y       ]
-	[-sin x   cos x * sin y    cos x * cos y]
-	*/
-	/*
+	float radTheta = glm::radians(theta);
 	float radPhi = glm::radians(phi);
-	float radTheta = glm::radians(theta);
-	glm::mat3 rotation(
-		cos(radTheta), 0, -sin(radTheta),
-		sin(radTheta) * sin(radPhi), cos(radPhi), cos(radTheta) * sin(radPhi),
-		sin(radTheta) * cos(radPhi), -sin(radPhi), cos(radTheta) * cos(radPhi));
-	glm::mat3 yaw(
-		cos(radTheta), 0, -sin(radTheta),
-		0, 1, 0,
-		sin(radTheta), 0, cos(radTheta));
-	glm::mat3 pitch(
-		1, 0, 0,
-		0, cos(radPhi), sin(radPhi),
-		0, -sin(radPhi), cos(radPhi));
-	*/
-	float radTheta = glm::radians(theta);
-	glm::mat2 yaw(
-		glm::cos(radTheta), glm::sin(radTheta),
-		-glm::sin(radTheta), glm::cos(radTheta)
-	);
-	glm::vec2 byxy(by.x, by.y);
-	_position += glm::vec3(byxy * yaw, 0);
+	glm::quat rotation(glm::vec3(radPhi, 0, -radTheta));
+	glm::vec3 movement = rotation * by;
+	// std::printf("by: %.3f %.3f %.3f, mv: %.3f %.3f %.3f, theta: %.3f, phi: %.3f\n", by.x, by.y, by.z, movement.x, movement.y, movement.z, theta, phi);
+	_position += movement;
 }
 
 glm::mat4 CameraHead::getViewMatrix()
