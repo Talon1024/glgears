@@ -26,7 +26,7 @@ void main() {
 	mat3 rotation = mat3(model[0][0], model[0][1], model[0][2], model[1][0], model[1][1], model[1][2], model[2][0], model[2][1], model[2][2]);
 	// vNrm = rotation * aNrm;
 	vec3 vNrm = rotation * aNrm;
-	float lightIntensity = dot(lightDiff, vNrm);
+	float lightIntensity = max(0, dot(lightDiff, vNrm));
 	diffuse = vec4(colour, 1.);
 	lightColour = vec4(vec3(lightIntensity), 1.);
 	vec4 screenPos = projection * view * model * vec4(aPos, 1.);
