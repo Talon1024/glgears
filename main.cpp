@@ -45,44 +45,6 @@
 #include "input.h"
 #include "camera.h"
 
-/*
-struct model_t {
-  GLuint array;
-  GLuint buffer;
-  GLuint vertexCount;
-  glm::mat4 transform;
-};
-
-struct model_list_item_t {
-  model_list_item_t* next;
-  model_t* data;
-};
-
-struct model_list_t {
-  model_list_item_t* head;
-} models;
-
-void add_model(model_t* model)
-{
-  if (!models.head)
-  {
-    model_list_item_t* current = new model_list_item_t;
-    current->data = model;
-    models.head = current;
-  }
-  else
-  {
-    model_list_item_t* current = models.head;
-    while (current->next != nullptr)
-    {
-      current = current->next;
-    }
-    current->next = new model_list_item_t;
-    current = current->next;
-    current->data = model;
-  }
-}
-*/
 static CameraHead cameraHead;
 static CameraEye cameraEye;
 static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
@@ -93,183 +55,156 @@ static GLfloat angle = 0.f;
 /* OpenGL draw function & timing */
 static void draw(void)
 {
-  const KeyInputState* input = Input::GetKeyState();
-  glClearColor(0.0, 0.0, 0.0, 0.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    const KeyInputState* input = Input::GetKeyState();
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glm::mat4 view = cameraHead.getViewMatrix();
-  glm::mat4 projection = cameraEye.getProjectionMatrix();
+    glm::mat4 view = cameraHead.getViewMatrix();
+    glm::mat4 projection = cameraEye.getProjectionMatrix();
 
-  glUseProgram(shaderProgram);
-  glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
-  glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-  glUniform1f(uniformZoom, 1);
-  glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 10);
-  glUniform1ui(uniformLit, input->lit);
-  glUniform1ui(uniformWireframe, input->wireframe);
+    glUseProgram(shaderProgram);
+    glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform1f(uniformZoom, 1);
+    glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 10);
+    glUniform1ui(uniformLit, input->lit);
+    glUniform1ui(uniformWireframe, input->wireframe);
 
-  glm::mat4 model(1.0);
-  model = glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
-  model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
-  glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-  glUniform3f(uniformColour, 0.8f, 0.1f, 0.f);
-  glBindBuffer(GL_ARRAY_BUFFER, gear1B);
-  glBindVertexArray(gear1A);
-  glDrawArrays(GL_TRIANGLES, 0, gear1S);
+    glm::mat4 model(1.0);
+    model = glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
+    model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform3f(uniformColour, 0.8f, 0.1f, 0.f);
+    glBindBuffer(GL_ARRAY_BUFFER, gear1B);
+    glBindVertexArray(gear1A);
+    glDrawArrays(GL_TRIANGLES, 0, gear1S);
 
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3(3.1, -2., 0.0));
-  model = glm::rotate(model, glm::radians(-2.f * angle - 9.f), glm::vec3(0.0, 0.0, 1.0));
-  glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-  glUniform3f(uniformColour, 0.f, 0.8f, 0.2f);
-  glBindBuffer(GL_ARRAY_BUFFER, gear2B);
-  glBindVertexArray(gear2A);
-  glDrawArrays(GL_TRIANGLES, 0, gear2S);
+    model = glm::mat4(1.0);
+    model = glm::translate(model, glm::vec3(3.1, -2., 0.0));
+    model = glm::rotate(model, glm::radians(-2.f * angle - 9.f), glm::vec3(0.0, 0.0, 1.0));
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform3f(uniformColour, 0.f, 0.8f, 0.2f);
+    glBindBuffer(GL_ARRAY_BUFFER, gear2B);
+    glBindVertexArray(gear2A);
+    glDrawArrays(GL_TRIANGLES, 0, gear2S);
 
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
-  model = glm::rotate(model, glm::radians(-2.f * angle - 25.f), glm::vec3(0.0, 0.0, 1.0));
-  glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-  glUniform3f(uniformColour, 0.2f, 0.2f, 1.f);
-  glBindBuffer(GL_ARRAY_BUFFER, gear3B);
-  glBindVertexArray(gear3A);
-  glDrawArrays(GL_TRIANGLES, 0, gear3S);
-
-  /*
-  glPushMatrix();
-    glRotatef(view_rotx, 1.0, 0.0, 0.0);
-    glRotatef(view_roty, 0.0, 1.0, 0.0);
-    glRotatef(view_rotz, 0.0, 0.0, 1.0);
-
-    glPushMatrix();
-      glTranslatef(-3.0, -2.0, 0.0);
-      glRotatef(angle, 0.0, 0.0, 1.0);
-      glCallList(gear1);
-    glPopMatrix();
-
-    glPushMatrix();
-      glTranslatef(3.1f, -2.f, 0.f);
-      glRotatef(-2.f * angle - 9.f, 0.f, 0.f, 1.f);
-      glCallList(gear2);
-    glPopMatrix();
-
-    glPushMatrix();
-      glTranslatef(-3.1f, 4.2f, 0.f);
-      glRotatef(-2.f * angle - 25.f, 0.f, 0.f, 1.f);
-      glCallList(gear3);
-    glPopMatrix();
-
-  glPopMatrix();
-  */
+    model = glm::mat4(1.0);
+    model = glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
+    model = glm::rotate(model, glm::radians(-2.f * angle - 25.f), glm::vec3(0.0, 0.0, 1.0));
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform3f(uniformColour, 0.2f, 0.2f, 1.f);
+    glBindBuffer(GL_ARRAY_BUFFER, gear3B);
+    glBindVertexArray(gear3A);
+    glDrawArrays(GL_TRIANGLES, 0, gear3S);
 }
 
 /* update animation parameters */
 static void animate(void)
 {
-  const KeyInputState* input = Input::GetKeyState();
-  if (input->animate)
-    angle = 100.f * (float) glfwGetTime();
-  if (input->forward)
-    cameraHead.move(glm::vec3(0, .125, 0));
-  if (input->backward)
-    cameraHead.move(glm::vec3(0, -.125, 0));
-  if (input->left)
-    cameraHead.move(glm::vec3(-.125, 0, 0));
-  if (input->right)
-    cameraHead.move(glm::vec3(.125, 0, 0));
-  const MouseInputState* mouse = Input::GetMouseState();
-  cameraHead.theta += mouse->moveX;
-  cameraHead.phi -= mouse->moveY;
-  cameraHead.phi = glm::clamp<GLfloat>(cameraHead.phi, -90, 90);
+    const KeyInputState* input = Input::GetKeyState();
+    if (input->animate)
+        angle = 100.f * (float) glfwGetTime();
+    if (input->forward)
+        cameraHead.move(glm::vec3(0, .125, 0));
+    if (input->backward)
+        cameraHead.move(glm::vec3(0, -.125, 0));
+    if (input->left)
+        cameraHead.move(glm::vec3(-.125, 0, 0));
+    if (input->right)
+        cameraHead.move(glm::vec3(.125, 0, 0));
+    const MouseInputState* mouse = Input::GetMouseState();
+    cameraHead.theta += mouse->moveX;
+    cameraHead.phi -= mouse->moveY;
+    cameraHead.phi = glm::clamp<GLfloat>(cameraHead.phi, -90, 90);
 }
 
 static GLint loadShader(FILE* sourceFile, GLint shaderType)
 {
-  char* source;
-  int length, shader, compileStatus = 0;
-  // Get length, allocate memory for source code, and read it in
-  fseek(sourceFile, 0, SEEK_END);
-  length = ftell(sourceFile);
-  source = new char[length];
-  fseek(sourceFile, 0, SEEK_SET);
-  fread(source, 1, length, sourceFile);
-  // Create and compile shader
-  shader = glCreateShader(shaderType);
-  glShaderSource(shader, 1, &source, &length);
-  glCompileShader(shader);
-  delete[] source;
-  // Show error and warning messages from the compiler
-  int textLength;
-  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &textLength);
-  if (textLength > 0)
-  {
-    char* compileErrorText = new char[textLength];
-    glGetShaderInfoLog(shader, textLength, &textLength, compileErrorText);
-    fputs(compileErrorText, stderr);
-    delete[] compileErrorText;
-  }
-  // Check whether shader successfully compiled or not
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-  if (compileStatus == GL_FALSE)
-  {
-    glDeleteShader(shader);
-    return 0;
-  }
-  return shader;
+    char* source;
+    int length, shader, compileStatus = 0;
+    // Get length, allocate memory for source code, and read it in
+    fseek(sourceFile, 0, SEEK_END);
+    length = ftell(sourceFile);
+    source = new char[length];
+    fseek(sourceFile, 0, SEEK_SET);
+    fread(source, 1, length, sourceFile);
+    // Create and compile shader
+    shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &source, &length);
+    glCompileShader(shader);
+    delete[] source;
+    // Show error and warning messages from the compiler
+    int textLength;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &textLength);
+    if (textLength > 0)
+    {
+        char* compileErrorText = new char[textLength];
+        glGetShaderInfoLog(shader, textLength, &textLength, compileErrorText);
+        fputs(compileErrorText, stderr);
+        delete[] compileErrorText;
+    }
+    // Check whether shader successfully compiled or not
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    if (compileStatus == GL_FALSE)
+    {
+        glDeleteShader(shader);
+        return 0;
+    }
+    return shader;
 }
 
 static bool initShaders()
 {
-  bool success = true;
-  GLint vertexShader, fragmentShader;
-  shaderProgram = glCreateProgram();
-  // Read the shader source files
-  FILE* vsSourceFile = fopen("default.vert", "r");
-  if (!vsSourceFile)
-  {
-    fputs("default.vert cannot be opened!", stderr);
-    success = false;
-  }
-  else
-  {
-    vertexShader = loadShader(vsSourceFile, GL_VERTEX_SHADER);
-    if (!vertexShader) success = false;
-    fclose(vsSourceFile);
-  }
+    bool success = true;
+    GLint vertexShader, fragmentShader;
+    shaderProgram = glCreateProgram();
+    // Read the shader source files
+    FILE* vsSourceFile = fopen("default.vert", "r");
+    if (!vsSourceFile)
+    {
+        fputs("default.vert cannot be opened!", stderr);
+        success = false;
+    }
+    else
+    {
+        vertexShader = loadShader(vsSourceFile, GL_VERTEX_SHADER);
+        if (!vertexShader) success = false;
+        fclose(vsSourceFile);
+    }
 
-  FILE* fsSourceFile = fopen("default.frag", "r");
-  if (!fsSourceFile)
-  {
-    fputs("default.frag cannot be opened!", stderr);
-    success = false;
-  }
-  else
-  {
-    fragmentShader = loadShader(fsSourceFile, GL_FRAGMENT_SHADER);
-    if (!fragmentShader) success = false;
-    fclose(fsSourceFile);
-  }
-  if (!success)
-  {
-    glDeleteProgram(shaderProgram);
-    return false;
-  }
+    FILE* fsSourceFile = fopen("default.frag", "r");
+    if (!fsSourceFile)
+    {
+        fputs("default.frag cannot be opened!", stderr);
+        success = false;
+    }
+    else
+    {
+        fragmentShader = loadShader(fsSourceFile, GL_FRAGMENT_SHADER);
+        if (!fragmentShader) success = false;
+        fclose(fsSourceFile);
+    }
+    if (!success)
+    {
+        glDeleteProgram(shaderProgram);
+        return false;
+    }
 
-  // Link the shader program
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
+    // Link the shader program
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
 
-  uniformLightPos = glGetUniformLocation(shaderProgram, "lightPos");
-  uniformProjection = glGetUniformLocation(shaderProgram, "projection");
-  uniformModel = glGetUniformLocation(shaderProgram, "model");
-  uniformView = glGetUniformLocation(shaderProgram, "view");
-  uniformLit = glGetUniformLocation(shaderProgram, "lit");
-  uniformZoom = glGetUniformLocation(shaderProgram, "zoom");
-  uniformColour = glGetUniformLocation(shaderProgram, "colour");
-  uniformWireframe = glGetUniformLocation(shaderProgram, "wireframe");
-  // Done!
-  return success;
+    uniformLightPos = glGetUniformLocation(shaderProgram, "lightPos");
+    uniformProjection = glGetUniformLocation(shaderProgram, "projection");
+    uniformModel = glGetUniformLocation(shaderProgram, "model");
+    uniformView = glGetUniformLocation(shaderProgram, "view");
+    uniformLit = glGetUniformLocation(shaderProgram, "lit");
+    uniformZoom = glGetUniformLocation(shaderProgram, "zoom");
+    uniformColour = glGetUniformLocation(shaderProgram, "colour");
+    uniformWireframe = glGetUniformLocation(shaderProgram, "wireframe");
+    // Done!
+    return success;
 }
 
 void addGear(
@@ -279,25 +214,15 @@ void addGear(
 /* program & OpenGL initialization */
 static void init(void)
 {
-  // static GLfloat pos[4] = {5.f, 5.f, 10.f, 0.f};
-  // static GLfloat red[4] = {0.8f, 0.1f, 0.f, 1.f};
-  // static GLfloat green[4] = {0.f, 0.8f, 0.2f, 1.f};
-  // static GLfloat blue[4] = {0.2f, 0.2f, 1.f, 1.f};
+    initShaders();
 
-  initShaders();
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
 
-  // glLineWidth(2.0); // Wireframe is now drawn with a shader
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  // glLightfv(GL_LIGHT0, GL_POSITION, pos);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  // glEnable(GL_LIGHTING);
-  // glEnable(GL_LIGHT0);
-  glEnable(GL_DEPTH_TEST);
-
-  addGear(gear1B, gear1A, gear1S, 1.f, 4.f, 1.f, 20, 0.7f);
-  addGear(gear2B, gear2A, gear2S, 0.5f, 2.f, 2.f, 10, 0.7f);
-  addGear(gear3B, gear3A, gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f);
+    addGear(gear1B, gear1A, gear1S, 1.f, 4.f, 1.f, 20, 0.7f);
+    addGear(gear2B, gear2A, gear2S, 0.5f, 2.f, 2.f, 10, 0.7f);
+    addGear(gear3B, gear3A, gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f);
 }
 
 void addGear(
@@ -353,7 +278,7 @@ int main(int argc, char *argv[])
         exit( EXIT_FAILURE );
     }
 
-    // glfwWindowHint(GLFW_DEPTH_BITS, 16);
+    glfwWindowHint(GLFW_DEPTH_BITS, 16);
     // glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -380,7 +305,6 @@ int main(int argc, char *argv[])
 
     // Parse command-line options
     init();
-    // cameraHead.move(glm::vec3(0, 0, 10));
 
     // Main loop
     while( !glfwWindowShouldClose(window) )
