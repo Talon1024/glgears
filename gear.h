@@ -27,4 +27,4 @@
 #include "glad.h"
 
 float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
-  GLfloat width, GLint teeth, GLfloat tooth_depth);
+    GLfloat width, GLint teeth, GLfloat tooth_depth);
