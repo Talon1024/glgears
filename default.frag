@@ -23,6 +23,6 @@ float gridFactor (vec2 vBC, float width, float feather) {
 
 void main() {
 	vec4 grayShade = vec4(vec3(distanceFromCamera / 50.), 1.);
-	gl_FragColor = (lit ? lightColour : grayShade) * diffuse;
+	gl_FragColor = mix(grayShade, lightColour, float(lit)) * diffuse;
 	gl_FragColor.rgb += (1.0 - gridFactor(vBary, 0.5, 0.5)) * float(wireframe);
 }
