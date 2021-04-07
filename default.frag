@@ -11,7 +11,7 @@ in float distanceFromCamera;
 
 out vec4 gl_FragColor;
 
-// https://github.com/rreusser/glsl-solid-wireframe/blob/master/barycentric/scaled.glsl
+// https://github.com/rreusser/glsl-solid-wireframe/blob/d7f98148133fb1357cf031812601dae368392db6/barycentric/scaled.glsl
 // Copyright Ricky Reusser 2016. MIT License.
 float gridFactor (vec2 vBC, float width, float feather) {
   float w1 = width - feather * 0.5;
@@ -24,7 +24,5 @@ float gridFactor (vec2 vBC, float width, float feather) {
 void main() {
 	vec4 grayShade = vec4(vec3(distanceFromCamera / 50.), 1.);
 	gl_FragColor = (lit ? lightColour : grayShade) * diffuse;
-	if (wireframe) {
-		gl_FragColor.rgb += 1.0 - gridFactor(vBary, 0.5, 0.5);
-	}
+	gl_FragColor.rgb += (1.0 - gridFactor(vBary, 0.5, 0.5)) * float(wireframe);
 }
