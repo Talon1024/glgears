@@ -31,8 +31,7 @@ void CameraHead::move(glm::vec3 by)
 
 glm::mat4 CameraHead::getViewMatrix()
 {
-    // glm::vec3 offset = -_position;
-    glm::vec3 direction = fromSpherical(theta, phi);
+    glm::vec3 direction = fromSpherical(theta, glm::clamp<float>(phi, -89., 89.));
     return glm::lookAt(_position, _position + direction, glm::vec3(0, 0, 1));
 }
 
