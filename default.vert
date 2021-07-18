@@ -9,7 +9,7 @@ uniform float zoom;
 
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNrm;
-layout(location = 2) in vec3 aBary;
+layout(location = 2) in vec2 aBary;
 
 out vec4 diffuse;
 out vec4 lightColour;
@@ -31,7 +31,7 @@ void main() {
 	lightColour = vec4(vec3(lightIntensity), 1.);
 	vec4 screenPos = projection * view * model * vec4(aPos, 1.);
 	distanceFromCamera = screenPos.z;
-	vBary = aBary.yz;
+	vBary = aBary;
 	screenPos.w *= zoom;
 	gl_Position = screenPos;
 	// gl_Position = vec4(aPos, zoom);

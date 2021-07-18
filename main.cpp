@@ -231,7 +231,7 @@ void addGear(
 {
     /* make the gears */
     // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
-    GLuint VBOstride = 9 * sizeof(float);
+    GLuint VBOstride = sizeof(GearVertex);
     // Offsets of each attribute, in bytes
     void* posOffset = 0;
     void* nrmOffset = (void*)(3 * sizeof(float));
@@ -243,14 +243,14 @@ void addGear(
     glGenVertexArrays(1, &array);
     // Upload buffer
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, size * 9 * sizeof(float), gearBuffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(GearVertex), gearBuffer, GL_STATIC_DRAW);
     glBindVertexArray(array);
     // Set up vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, nrmOffset);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VBOstride, colOffset);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VBOstride, colOffset);
     glEnableVertexAttribArray(2);
     // Release bindings
     glBindBuffer(GL_ARRAY_BUFFER, 0);

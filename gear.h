@@ -26,5 +26,14 @@
 #pragma once
 #include "glad.h"
 
+typedef float vec3_t[3];
+typedef float vec2_t[2];
+
+struct GearVertex {
+    vec3_t pos;
+    vec3_t nrm;
+    vec2_t bary;
+};
+
 float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     GLfloat width, GLint teeth, GLfloat tooth_depth);
