@@ -36,17 +36,17 @@
 
 // Forward declarations for addVertex/Quad/Tri. These are only used in gear.cpp.
 
-static void addVertex(float* buffer,
+static void addVertex(GearVertex* buffer,
                       float vx, float vy, float vz,
                       float nx, float ny, float nz,
                       float r, float g);
-static void addQuad(float* buffer,
+static void addQuad(GearVertex* buffer,
                     float nx, float ny, float nz,
                     float v1x, float v1y, float v1z,
                     float v2x, float v2y, float v2z,
                     float v3x, float v3y, float v3z,
                     float v4x, float v4y, float v4z);
-static void addTri(float* buffer,
+static void addTri(GearVertex* buffer,
                    float nx, float ny, float nz,
                    float v1x, float v1y, float v1z,
                    float v2x, float v2y, float v2z,
@@ -74,7 +74,7 @@ static void addTri(float* buffer,
 // Front face, front teeth, back face, back teeth, central hole
 #define MODEL_PIECE_COUNT 5
 
-float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
+GearVertex* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     GLfloat width, GLint teeth, GLfloat tooth_depth)
 {
     GLint i;
@@ -100,9 +100,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
     // unsigned int VBOstride = sizeof(float);
     // Number of floats in the buffer
     vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
-    unsigned long vertexSize = sizeof(GearVertex) / sizeof(float);
-    unsigned int VBOsize = vertexCount * sizeof(GearVertex);
-    float* VBOdata = new float[VBOsize];
+    GearVertex* VBOdata = new GearVertex[vertexCount];
 
     // glShadeModel(GL_FLAT); // flat or smooth shading depends on normals
 
@@ -122,14 +120,14 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f
         );
-        VBOpos += VERTICES_PER_TRI * vertexSize;
+        VBOpos += VERTICES_PER_TRI;
         addQuad(VBOdata + VBOpos, nx, ny, nz,
                 r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
                 r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
                 r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), width * 0.5f,
                 r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), width * 0.5f
         );
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
         glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
@@ -151,7 +149,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
             r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
         glVertex3f(r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f);
@@ -175,14 +173,14 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
         );
-        VBOpos += VERTICES_PER_TRI * vertexSize;
+        VBOpos += VERTICES_PER_TRI;
         addQuad(VBOdata + VBOpos, nx, ny, nz,
                 r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), -width * 0.5f,
                 r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), -width * 0.5f,
                 r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
                 r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
         );
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
         glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
@@ -205,7 +203,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
             r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
             r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
         glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
@@ -238,7 +236,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
             r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
             r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
         nx = (float) cos(angle);
         ny = (float) sin(angle);
@@ -250,7 +248,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f,
             r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
             r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         u = r1 * (float) cos(angle + 3 * da) - r2 * (float) cos(angle + 2 * da);
         v = r1 * (float) sin(angle + 3 * da) - r2 * (float) sin(angle + 2 * da);
         // glNormal3f(v, -u, 0.f);
@@ -262,7 +260,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
         // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
         // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
@@ -274,7 +272,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
             r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
             r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), width * 0.5f,
             r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), -width * 0.5f);
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
     }
 
     // glVertex3f(r1 * (float) cos(0), r1 * (float) sin(0), width * 0.5f);
@@ -312,7 +310,7 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
         vtx->nrm[0] = -(float) cos(nextAngle);
         vtx->nrm[1] = -(float) sin(nextAngle);
         */
-        VBOpos += VERTICES_PER_TRI * vertexSize * TRIS_PER_QUAD;
+        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
         // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
     }
@@ -337,19 +335,18 @@ float* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
 }
 
 
-static void addVertex(float* buffer, float vx, float vy, float vz, float nx, float ny,
+static void addVertex(GearVertex* buffer, float vx, float vy, float vz, float nx, float ny,
     float nz, float r, float g/*, float b*/)
 {
-    GearVertex* vtx = (GearVertex*) buffer;
     // Position
-    vtx->pos[0] = vx; vtx->pos[1] = vy; vtx->pos[2] = vz;
+    buffer->pos.x = vx; buffer->pos.y = vy; buffer->pos.z = vz;
     // Normal
-    vtx->nrm[0] = nx; vtx->nrm[1] = ny; vtx->nrm[2] = nz;
+    buffer->nrm.x = nx; buffer->nrm.y = ny; buffer->nrm.z = nz;
     // Colour
-    vtx->bary[0] = r;  vtx->bary[1] = g; //  buffer[8] = b;
+    buffer->bary.x = r;  buffer->bary.y = g; //  buffer[8] = b;
 }
 
-static void addQuad(float* buffer,
+static void addQuad(GearVertex* buffer,
                          float nx, float ny, float nz,
                          float v1x, float v1y, float v1z,
                          float v2x, float v2y, float v2z,
@@ -370,29 +367,22 @@ static void addQuad(float* buffer,
     pos += sizeof(GearVertex);
     addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
     */
-    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0);
-    pos += sizeof(GearVertex) / sizeof(float);
-    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1);
-    pos += sizeof(GearVertex) / sizeof(float);
-    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0);
-    pos += sizeof(GearVertex) / sizeof(float);
-    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0);
-    pos += sizeof(GearVertex) / sizeof(float);
-    addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 1);
-    pos += sizeof(GearVertex) / sizeof(float);
+    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0); pos += 1;
+    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1); pos += 1;
+    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0); pos += 1;
+    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0); pos += 1;
+    addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 1); pos += 1;
     addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0);
 }
 
-static void addTri(float* buffer,
+static void addTri(GearVertex* buffer,
                         float nx, float ny, float nz,
                          float v1x, float v1y, float v1z,
                          float v2x, float v2y, float v2z,
                          float v3x, float v3y, float v3z)
 {
     unsigned int pos = 0;
-    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0);
-    pos += sizeof(GearVertex) / sizeof(float);
-    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1);
-    pos += sizeof(GearVertex) / sizeof(float);
+    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0); pos += 1;
+    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1); pos += 1;
     addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 0);
 }

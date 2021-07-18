@@ -236,7 +236,7 @@ void addGear(
     void* posOffset = 0;
     void* nrmOffset = (void*)(3 * sizeof(float));
     void* colOffset = (void*)(6 * sizeof(float));
-    float* gearBuffer = gear(size, innerRadius, outerRadius, width, teeth, toothDepth);
+    GearVertex* gearBuffer = gear(size, innerRadius, outerRadius, width, teeth, toothDepth);
 
     // Set up buffer and vertex array
     glGenBuffers(1, &buffer);
