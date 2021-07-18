@@ -15,7 +15,7 @@ out vec4 diffuse;
 out vec4 lightColour;
 out vec2 vBary;
 out float distanceFromCamera;
-out vec4 gl_Position;
+// out vec4 gl_Position;
 
 void main() {
 	// NOTE: This is per-vertex lighting. It's faster, but doesn't look as good

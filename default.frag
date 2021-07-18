@@ -9,7 +9,7 @@ in vec4 diffuse;
 in vec2 vBary;
 in float distanceFromCamera;
 
-out vec4 gl_FragColor;
+// out vec4 gl_FragColor;
 
 // https://github.com/rreusser/glsl-solid-wireframe/blob/d7f98148133fb1357cf031812601dae368392db6/barycentric/scaled.glsl
 // Copyright Ricky Reusser 2016. MIT License.
