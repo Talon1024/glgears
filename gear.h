@@ -29,6 +29,10 @@
 typedef union
 {
     float xyz[3];
+    float& operator[](unsigned long index)
+    {
+        return xyz[index];
+    }
     struct {
         float x;
         float y;
@@ -38,6 +42,10 @@ typedef union
 typedef union
 {
     float xy[2];
+    float& operator[](unsigned long index)
+    {
+        return xy[index];
+    }
     struct {
         float x;
         float y;

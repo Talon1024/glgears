@@ -32,7 +32,7 @@
 #include <cmath>
 #include "glad.h"
 #include "gear.h"
-#include <cstdio>
+// #include <cstdio>
 
 // Forward declarations for addVertex/Quad/Tri. These are only used in gear.cpp.
 
@@ -314,20 +314,7 @@ GearVertex* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius
     }
     // glEnd();
 
-    /*
-    printf("%-8s %-8s %-8s %-8s %-8s %-8s %-8s %-8s",
-        "pos x", "pos y", "pos z",
-        "nrm x", "nrm y", "nrm z",
-        "bary x", "bary y");
-    for (unsigned i = 0; i < VBOsize; i++)
-    {
-        if (i % 8 == 0)
-        {
-            printf("\n");
-        }
-        printf("% -8.3f ", VBOdata[i]);
-    }
-    */
+    // printf("VBOsize and VBOpos: %d %d\n", vertexCount, VBOpos);
 
     return VBOdata;
 }
