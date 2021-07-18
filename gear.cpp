@@ -30,7 +30,6 @@
 #endif
 
 #include <cmath>
-#include "glad.h"
 #include "gear.h"
 // #include <cstdio>
 
