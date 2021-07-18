@@ -6,17 +6,19 @@ opengl = dependency('GL')
 glfw = dependency('glfw3')
 
 glm_path = include_directories('glm')
+glad_path = include_directories('glad')
 
-glad_targ = custom_target('glad',
-input: 'dlglad.sh',
-output: ['glad.c','glad.h', 'khrplatform.h'],
-command: ['zsh', '@INPUT@'],
-install: false)
-
-glad_dep = declare_dependency(sources: [glad_targ], link_args: ['-ldl'])
+glad_dep = declare_dependency(
+	sources: [
+		'glad/glad.c',
+		'glad/glad.h',
+		'glad/khrplatform.h'
+	],
+	link_args: ['-ldl']
+)
 
 deplist = [opengl, glfw, glad_dep]
 
 executable('gears',
 	'main.cpp', 'gear.cpp', 'input.cpp', 'camera.cpp',
-	include_directories: glm_path, dependencies: deplist)
+	include_directories: [glm_path, glad_path], dependencies: deplist)
