@@ -298,18 +298,16 @@ GearVertex* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius
             r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), width * 0.5f);
         // Modify normal of next vertex so the inside looks smooth
         // Vertices 3 and 4 -> 2, 3, 4
-        /*
-        GearVertex* vtx = (GearVertex*) VBOdata + VBOpos + (sizeof(GearVertex) / sizeof(float)) * 2;
-        vtx->nrm[0] = -(float) cos(nextAngle);
-        vtx->nrm[1] = -(float) sin(nextAngle);
-        vtx = (GearVertex*) VBOdata + VBOpos + (sizeof(GearVertex) / sizeof(float)) * 3;
-        // No need to modify normal Z coordinate
-        vtx->nrm[0] = -(float) cos(nextAngle);
-        vtx->nrm[1] = -(float) sin(nextAngle);
+        GearVertex* vtx = VBOdata + VBOpos + 2;
+        vtx->nrm.x = -(float) cos(nextAngle);
+        vtx->nrm.y = -(float) sin(nextAngle);
         vtx += 1;
-        vtx->nrm[0] = -(float) cos(nextAngle);
-        vtx->nrm[1] = -(float) sin(nextAngle);
-        */
+        // No need to modify normal Z coordinate
+        vtx->nrm.x = -(float) cos(nextAngle);
+        vtx->nrm.y = -(float) sin(nextAngle);
+        vtx += 1;
+        vtx->nrm.x = -(float) cos(nextAngle);
+        vtx->nrm.y = -(float) sin(nextAngle);
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
         // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
