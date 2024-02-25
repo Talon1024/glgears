@@ -39,6 +39,7 @@ typedef union
         float z;
     };
 } vec3_t;
+
 typedef union
 {
     float xy[2];
@@ -58,5 +59,12 @@ struct GearVertex {
     vec2_t bary;
 };
 
-GearVertex* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
-    GLfloat width, GLint teeth, GLfloat tooth_depth);
+struct GearBlueprint {
+    GLfloat inner_radius;
+    GLfloat outer_radius;
+    GLfloat width;
+    GLint teeth;
+    GLfloat tooth_depth;
+};
+
+GearVertex* gear(GLuint& vertexCount, GearBlueprint bp);

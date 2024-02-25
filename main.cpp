@@ -25,6 +25,7 @@
  */
 
 #include "glm/common.hpp"
+#include "khrplatform.h"
 #if defined(_MSC_VER)
  // Make MS math.h define M_PI
  #define _USE_MATH_DEFINES
@@ -34,6 +35,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <vector>
 
 #include "glad.h"
 #define GLFW_INCLUDE_NONE
@@ -45,15 +47,104 @@
 #include "input.h"
 #include "camera.h"
 
-static CameraHead cameraHead;
-static CameraEye cameraEye;
-static GLuint gear1A, gear1B, gear1S, gear2A, gear2B, gear2S, gear3A, gear3B, gear3S;
-static GLint shaderProgram;
-static GLint uniformProjection, uniformModel, uniformView, uniformLightPos, uniformLit, uniformZoom, uniformColour, uniformWireframe;
+static GLint uniformColour, uniformModel;
 static GLfloat angle = 0.f;
 
+struct ThreeDimensionalObject {
+    private:
+    GLuint vbo;
+    GLuint vao;
+    GLuint vertexCount;
+
+    public:
+    ThreeDimensionalObject(vec3_t colour, vec3_t position) : colour(colour), position(position), angleMultiply(1.0), angleAdd(0.0) {}
+
+    ThreeDimensionalObject(vec3_t colour, vec3_t position, float angleMultiply, float angleAdd) : colour(colour), position(position), angleMultiply(angleMultiply), angleAdd(angleAdd) {}
+
+    // Uniforms
+    vec3_t colour;
+    vec3_t position;
+    // Angle offsets
+    float angleMultiply;
+    float angleAdd;
+
+    void draw() const;
+    void setupForDrawing(
+        GLfloat innerRadius,
+        GLfloat outerRadius,
+        GLfloat width,
+        GLint teeth,
+        GLfloat toothDepth
+    );
+
+    static const void* posOffset;
+    static const void* nrmOffset;
+    static const void* colOffset;
+};
+
+// Offsets of each attribute, in bytes
+const void* ThreeDimensionalObject::posOffset = 0;
+const void* ThreeDimensionalObject::nrmOffset = (void*)(3 * sizeof(float));
+const void* ThreeDimensionalObject::colOffset = (void*)(6 * sizeof(float));
+
+void ThreeDimensionalObject::draw() const {
+    glm::mat4 model(1.0);
+    model = glm::translate(
+        model,
+        glm::vec3(position.x, position.y, position.z)
+    );
+    model = glm::rotate(
+        model,
+        glm::radians(angleMultiply * angle + angleAdd),
+        glm::vec3(0.0, 0.0, 1.0)
+    );
+
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform3f(uniformColour, colour.x, colour.y, colour.z);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+}
+
+void ThreeDimensionalObject::setupForDrawing(GLfloat innerRadius,
+    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth) {
+
+    // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
+    GLuint VBOstride = sizeof(GearVertex);
+
+    GearBlueprint bp {innerRadius, outerRadius, width, teeth, toothDepth};
+
+    GearVertex* gearBuffer = gear(vertexCount, bp);
+
+    // Set up buffer and vertex array
+    glGenBuffers(1, &vbo);
+    glGenVertexArrays(1, &vao);
+    // Upload buffer
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GearVertex), gearBuffer, GL_STATIC_DRAW);
+    glBindVertexArray(vao);
+    // Set up vertex attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, nrmOffset);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VBOstride, colOffset);
+    glEnableVertexAttribArray(2);
+    // Release bindings
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    // Free buffer, since it has been uploaded already
+    delete[] gearBuffer;
+}
+
+static CameraHead cameraHead;
+static CameraEye cameraEye;
+static GLint shaderProgram;
+static GLint uniformProjection, uniformWireframe, uniformView, uniformLightPos, uniformLit, uniformZoom;
+
 /* OpenGL draw function & timing */
-static void draw(void)
+static void draw(const std::vector<ThreeDimensionalObject> &objects)
 {
     const KeyInputState* input = Input::GetKeyState();
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -70,32 +161,9 @@ static void draw(void)
     glUniform1ui(uniformLit, input->lit);
     glUniform1ui(uniformWireframe, input->wireframe);
 
-    glm::mat4 model(1.0);
-    model = glm::translate(model, glm::vec3(-3.0, -2.0, 0.0));
-    model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
-    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniform3f(uniformColour, 0.8f, 0.1f, 0.f);
-    glBindBuffer(GL_ARRAY_BUFFER, gear1B);
-    glBindVertexArray(gear1A);
-    glDrawArrays(GL_TRIANGLES, 0, gear1S);
-
-    model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(3.1, -2., 0.0));
-    model = glm::rotate(model, glm::radians(-2.f * angle - 9.f), glm::vec3(0.0, 0.0, 1.0));
-    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniform3f(uniformColour, 0.f, 0.8f, 0.2f);
-    glBindBuffer(GL_ARRAY_BUFFER, gear2B);
-    glBindVertexArray(gear2A);
-    glDrawArrays(GL_TRIANGLES, 0, gear2S);
-
-    model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(-3.1, 4.2, 0.0));
-    model = glm::rotate(model, glm::radians(-2.f * angle - 25.f), glm::vec3(0.0, 0.0, 1.0));
-    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniform3f(uniformColour, 0.2f, 0.2f, 1.f);
-    glBindBuffer(GL_ARRAY_BUFFER, gear3B);
-    glBindVertexArray(gear3A);
-    glDrawArrays(GL_TRIANGLES, 0, gear3S);
+    for (const ThreeDimensionalObject& obj : objects) {
+        obj.draw();
+    }
 }
 
 /* update animation parameters */
@@ -207,12 +275,8 @@ static bool initShaders()
     return success;
 }
 
-void addGear(
-    GLuint& buffer, GLuint& array, GLuint& size, GLfloat innerRadius,
-    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth);
-
 /* program & OpenGL initialization */
-static void init(void)
+static void init(std::vector<ThreeDimensionalObject> &objects)
 {
     initShaders();
 
@@ -220,43 +284,25 @@ static void init(void)
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
 
-    addGear(gear1B, gear1A, gear1S, 1.f, 4.f, 1.f, 20, 0.7f);
-    addGear(gear2B, gear2A, gear2S, 0.5f, 2.f, 2.f, 10, 0.7f);
-    addGear(gear3B, gear3A, gear3S, 1.3f, 2.f, 0.5f, 10, 0.7f);
-}
+    objects.push_back(ThreeDimensionalObject {
+        vec3_t {{0.8, 0.1, 0.0}}, // colour
+        vec3_t {{-3.0, -2.0, 0.0}} // position
+    });
+    objects.back().setupForDrawing(1., 4., 1., 20, 0.7);
 
-void addGear(
-    GLuint& buffer, GLuint& array, GLuint& size, GLfloat innerRadius,
-    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth)
-{
-    /* make the gears */
-    // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
-    GLuint VBOstride = sizeof(GearVertex);
-    // Offsets of each attribute, in bytes
-    void* posOffset = 0;
-    void* nrmOffset = (void*)(3 * sizeof(float));
-    void* colOffset = (void*)(6 * sizeof(float));
-    GearVertex* gearBuffer = gear(size, innerRadius, outerRadius, width, teeth, toothDepth);
+    objects.push_back(ThreeDimensionalObject {
+        vec3_t {{0., 0.8, 0.2}}, // colour
+        vec3_t {{3.1, -2., 0.0}}, // position
+        -2.0, -9.0 // angleMultiply, angleAdd
+    });
+    objects.back().setupForDrawing(0.5, 2., 2., 10, 0.7);
 
-    // Set up buffer and vertex array
-    glGenBuffers(1, &buffer);
-    glGenVertexArrays(1, &array);
-    // Upload buffer
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(GearVertex), gearBuffer, GL_STATIC_DRAW);
-    glBindVertexArray(array);
-    // Set up vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, nrmOffset);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VBOstride, colOffset);
-    glEnableVertexAttribArray(2);
-    // Release bindings
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    // Free buffer, since it has been uploaded already
-    delete[] gearBuffer;
+    objects.push_back(ThreeDimensionalObject {
+        vec3_t {{0.2, 0.2, 1.}}, // colour
+        vec3_t {{-3.1, 4.2, 0.0}}, // position
+        -2.0, -25.0 // angleMultiply, angleAdd
+    });
+    objects.back().setupForDrawing(1.3, 2., 0.5, 10, 0.7);
 }
 
 static void onWindowResize(GLFWwindow* window, int width, int height)
@@ -303,14 +349,16 @@ int main(int argc, char *argv[])
     onWindowResize(window, windowWidth, windowHeight);
     glfwSwapInterval( 1 );
 
+    std::vector<ThreeDimensionalObject> objects;
+
     // Parse command-line options
-    init();
+    init(objects);
 
     // Main loop
     while( !glfwWindowShouldClose(window) )
     {
         // Draw gears
-        draw();
+        draw(objects);
 
         // Update animation
         animate();

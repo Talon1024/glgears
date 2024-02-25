@@ -1,6 +1,6 @@
 # Meson file for gl_gears2, a OpenGL experiment
 
-project('gl_gears2', 'c', 'cpp', default_options: ['cpp-std=c++11'])
+project('gl_gears2', 'c', 'cpp', default_options: ['cpp_std=c++11'])
 
 opengl = dependency('GL')
 glfw = dependency('glfw3')

@@ -59,13 +59,14 @@ static void addTri(GearVertex* buffer,
     normal: XYZ vertex normal vector (3 floats)
     colour: RGB vertex colour (3 floats)
 
-    The first argument, VBOsize, is passed by reference. It is set to the number
-    of floats in the buffer.
+    The first argument, vertexCount, is passed by reference. It is set to the
+    number of floats in the buffer.
 
     Input:  inner_radius - radius of hole at center
-                    outer_radius - radius at center of teeth
-                    width - width of gear teeth - number of teeth
-                    tooth_depth - depth of tooth
+            outer_radius - radius at center of teeth
+            width - width of gear
+            teeth - number of teeth
+            tooth_depth - depth of tooth
  **/
 
 #define TRIS_PER_QUAD 2
@@ -73,13 +74,19 @@ static void addTri(GearVertex* buffer,
 // Front face, front teeth, back face, back teeth, central hole
 #define MODEL_PIECE_COUNT 5
 
-GearVertex* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius,
-    GLfloat width, GLint teeth, GLfloat tooth_depth)
+GearVertex* gear(GLuint& vertexCount, GearBlueprint bp)
 {
     GLint i;
     GLfloat r0, r1, r2;
     GLfloat angle, da;
     GLfloat u, v, len;
+
+    GLfloat
+        inner_radius = bp.inner_radius,
+        outer_radius = bp.outer_radius,
+        width = bp.width,
+        tooth_depth = bp.tooth_depth;
+    GLint teeth = bp.teeth;
 
     // Distance from the center to the hole
     r0 = inner_radius;
@@ -95,9 +102,7 @@ GearVertex* gear(GLuint& vertexCount, GLfloat inner_radius, GLfloat outer_radius
     unsigned int quadCount = teeth * MODEL_PIECE_COUNT + teeth * 4;
     // Two pieces of the gear use "addTri"
     unsigned int extraTriCount = teeth * 2;
-    // Number of bytes for each vertex
-    // unsigned int VBOstride = sizeof(float);
-    // Number of floats in the buffer
+    // Number of vertices in the buffer
     vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
     GearVertex* VBOdata = new GearVertex[vertexCount];
 
