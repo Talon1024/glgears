@@ -29,8 +29,11 @@
 #include <memory>
 
 struct GearVertex {
+    // Position
     vec3_t pos;
+    // Normal
     vec3_t nrm;
+    // Barycentric coordinate, used by the shaders to display the wireframe
     vec2_t bary;
 };
 

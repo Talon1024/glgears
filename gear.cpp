@@ -31,26 +31,27 @@
 
 #include <cmath>
 #include "gear.h"
+#include "vector.h"
 #include <memory>
 #include <utility>
 
 // Forward declarations for addVertex/Quad/Tri. These are only used in gear.cpp.
 
 static void addVertex(GearVertex* buffer,
-                      float vx, float vy, float vz,
-                      float nx, float ny, float nz,
-                      float r, float g);
+                      vec3_t v,
+                      vec3_t n,
+                      vec2_t b);
 static void addQuad(GearVertex* buffer,
-                    float nx, float ny, float nz,
-                    float v1x, float v1y, float v1z,
-                    float v2x, float v2y, float v2z,
-                    float v3x, float v3y, float v3z,
-                    float v4x, float v4y, float v4z);
+                    vec3_t n,
+                    vec3_t v1,
+                    vec3_t v2,
+                    vec3_t v3,
+                    vec3_t v4);
 static void addTri(GearVertex* buffer,
-                   float nx, float ny, float nz,
-                   float v1x, float v1y, float v1z,
-                   float v2x, float v2y, float v2z,
-                   float v3x, float v3y, float v3z);
+                   vec3_t n,
+                   vec3_t v1,
+                   vec3_t v2,
+                   vec3_t v3);
 
 /**
     Generate geometry for a gear. Returns an interleaved vertex buffer with these
@@ -121,17 +122,17 @@ GearBuffers gear(GearBlueprint bp)
     unsigned int VBOpos = 0;
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
-        addTri(VBOdata.get() + VBOpos, nx, ny, nz,
-            r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f
+        addTri(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f}},
+            {{r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-                r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
-                r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
-                r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), width * 0.5f,
-                r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), width * 0.5f
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+                {{r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f}},
+                {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
+                {{r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), width * 0.5f}},
+                {{r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
@@ -150,11 +151,11 @@ GearBuffers gear(GearBlueprint bp)
     da = 2.f * (float) M_PI / teeth / 4.f;
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
-            r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
-            r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f}},
+            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
+            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
@@ -174,17 +175,17 @@ GearBuffers gear(GearBlueprint bp)
     // glBegin(GL_QUAD_STRIP);
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
-        addTri(VBOdata.get() + VBOpos, nx, ny, nz,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
-            r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
+        addTri(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f}},
+            {{r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-                r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), -width * 0.5f,
-                r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), -width * 0.5f,
-                r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
-                r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+                {{r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), -width * 0.5f}},
+                {{r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), -width * 0.5f}},
+                {{r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f}},
+                {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
@@ -204,11 +205,11 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
 
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
-            r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
-            r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}},
+            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f}},
+            {{r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f}},
+            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
@@ -237,11 +238,11 @@ GearBuffers gear(GearBlueprint bp)
         nx = v;
         ny = -u;
         nz = 0.0;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f,
-            r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f,
-            r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f,
-            r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f}},
+            {{r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f}},
+            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f}},
+            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
         nx = (float) cos(angle);
@@ -249,11 +250,11 @@ GearBuffers gear(GearBlueprint bp)
         nz = 0.0;
         // glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
         // glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f, // This line and the next are taken from the previous quad
-            r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f,
-            r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
-            r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f}}, // This line and the next are taken from the previous quad
+            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f}},
+            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f}},
+            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         u = r1 * (float) cos(angle + 3 * da) - r2 * (float) cos(angle + 2 * da);
         v = r1 * (float) sin(angle + 3 * da) - r2 * (float) sin(angle + 2 * da);
@@ -261,11 +262,11 @@ GearBuffers gear(GearBlueprint bp)
         nx = v;
         ny = -u;
         nz = 0.0;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f,
-            r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f}},
+            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
         // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
@@ -273,11 +274,11 @@ GearBuffers gear(GearBlueprint bp)
         nx = (float) cos(angle);
         ny = (float) sin(angle);
         nz = 0.0;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f,
-            r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f,
-            r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), width * 0.5f,
-            r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), -width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
+            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}},
+            {{r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), width * 0.5f}},
+            {{r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
     }
 
@@ -297,11 +298,11 @@ GearBuffers gear(GearBlueprint bp)
         nx = -(float) cos(angle);
         ny = -(float) sin(angle);
         nz = 0.f;
-        addQuad(VBOdata.get() + VBOpos, nx, ny, nz,
-            r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f,
-            r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f,
-            r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), -width * 0.5f,
-            r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), width * 0.5f);
+        addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
+            {{r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f}},
+            {{r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f}},
+            {{r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), -width * 0.5f}},
+            {{r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), width * 0.5f}});
         // Modify normal of next vertex so the inside looks smooth
         // Vertices 3 and 4 -> 2, 3, 4
         GearVertex* vtx = VBOdata.get() + VBOpos + 2;
@@ -326,23 +327,22 @@ GearBuffers gear(GearBlueprint bp)
 }
 
 
-static void addVertex(GearVertex* buffer, float vx, float vy, float vz, float nx, float ny,
-    float nz, float r, float g/*, float b*/)
+static void addVertex(GearVertex* buffer,
+                      vec3_t v,
+                      vec3_t n,
+                      vec2_t b)
 {
-    // Position
-    buffer->pos.x = vx; buffer->pos.y = vy; buffer->pos.z = vz;
-    // Normal
-    buffer->nrm.x = nx; buffer->nrm.y = ny; buffer->nrm.z = nz;
-    // Colour
-    buffer->bary.x = r;  buffer->bary.y = g; //  buffer[8] = b;
+    buffer->pos = v;
+    buffer->nrm = n;
+    buffer->bary = b;
 }
 
 static void addQuad(GearVertex* buffer,
-                         float nx, float ny, float nz,
-                         float v1x, float v1y, float v1z,
-                         float v2x, float v2y, float v2z,
-                         float v3x, float v3y, float v3z,
-                         float v4x, float v4y, float v4z)
+                    vec3_t n,
+                    vec3_t v1,
+                    vec3_t v2,
+                    vec3_t v3,
+                    vec3_t v4)
 {
     unsigned int pos = 0;
     /*
@@ -358,22 +358,22 @@ static void addQuad(GearVertex* buffer,
     pos += sizeof(GearVertex);
     addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
     */
-    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0); pos += 1;
-    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1); pos += 1;
-    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0); pos += 1;
-    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, 0, 0); pos += 1;
-    addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 1); pos += 1;
-    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0);
+    addVertex(buffer + pos, v1, n, {{1., 0.}}); pos += 1;
+    addVertex(buffer + pos, v2, n, {{0., 1.}}); pos += 1;
+    addVertex(buffer + pos, v4, n, {{0., 0.}}); pos += 1;
+    addVertex(buffer + pos, v4, n, {{0., 0.}}); pos += 1;
+    addVertex(buffer + pos, v3, n, {{0., 1.}}); pos += 1;
+    addVertex(buffer + pos, v1, n, {{1., 0.}});
 }
 
 static void addTri(GearVertex* buffer,
-                        float nx, float ny, float nz,
-                         float v1x, float v1y, float v1z,
-                         float v2x, float v2y, float v2z,
-                         float v3x, float v3y, float v3z)
+                   vec3_t n,
+                   vec3_t v1,
+                   vec3_t v2,
+                   vec3_t v3)
 {
     unsigned int pos = 0;
-    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, 1, 0); pos += 1;
-    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, 0, 1); pos += 1;
-    addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, 0, 0);
+    addVertex(buffer + pos, v1, n, {{1., 0.}}); pos += 1;
+    addVertex(buffer + pos, v2, n, {{0., 1.}}); pos += 1;
+    addVertex(buffer + pos, v3, n, {{0., 0.}});
 }
