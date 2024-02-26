@@ -39,7 +39,8 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
     GLuint VBOstride = sizeof(GearVertex);
 
-    GearVertex* gearBuffer = gear(vertexCount, bp);
+    GearBuffers gearBuffers = gear(bp);
+	vertexCount = gearBuffers.vertexCount;
 
     if (vao) glDeleteVertexArrays(1, &vao);
     if (vbo) glDeleteBuffers(1, &vbo);
@@ -52,8 +53,10 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     // Upload buffer
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, gearBuffers.indexCount * sizeof(GLuint), gearBuffers.indexBuffer.get(), GL_STATIC_DRAW);
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GearVertex), gearBuffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GearVertex), gearBuffers.vertexBuffer.get(), GL_STATIC_DRAW);
     // Set up vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
     glEnableVertexAttribArray(0);
@@ -66,5 +69,5 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // Free buffer, since it has been uploaded already
-    delete[] gearBuffer;
+    // delete[] gearBuffer;
 }

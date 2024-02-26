@@ -26,6 +26,7 @@
 #pragma once
 #include "glad.h"
 #include "vector.h"
+#include <memory>
 
 struct GearVertex {
     vec3_t pos;
@@ -41,4 +42,11 @@ struct GearBlueprint {
     GLfloat tooth_depth;
 };
 
-GearVertex* gear(GLuint& vertexCount, GearBlueprint bp);
+struct GearBuffers {
+    std::unique_ptr<GearVertex[]> vertexBuffer;
+    std::unique_ptr<GLuint[]> indexBuffer;
+    GLuint indexCount;
+    GLuint vertexCount;
+};
+
+GearBuffers gear(GearBlueprint bp);
