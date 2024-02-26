@@ -19,7 +19,7 @@ static glm::vec3 fromSpherical(float theta, float phi, bool degrees = true)
     );
 }
 
-void CameraHead::move(glm::vec3 by)
+void Camera::move(glm::vec3 by)
 {
     float radTheta = glm::radians(theta);
     float radPhi = glm::radians(phi);
@@ -29,19 +29,19 @@ void CameraHead::move(glm::vec3 by)
     _position += movement;
 }
 
-glm::mat4 CameraHead::getViewMatrix()
+glm::mat4 Camera::getViewMatrix()
 {
     glm::vec3 direction = fromSpherical(theta, glm::clamp<float>(phi, -89., 89.));
     return glm::lookAt(_position, _position + direction, glm::vec3(0, 0, 1));
 }
 
-void CameraEye::onWindowResize(GLFWwindow *window, int width, int height)
+void Camera::onWindowResize(GLFWwindow *window, int width, int height)
 {
     aspectRatio = (float)width / height;
     fovy = fov / aspectRatio;
 }
 
-glm::mat4 CameraEye::getProjectionMatrix(float near, float far)
+glm::mat4 Camera::getProjectionMatrix(float near, float far)
 {
     if (orthographic)
     {

@@ -194,10 +194,9 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     delete[] gearBuffer;
 }
 
-static CameraHead cameraHead;
-static CameraEye cameraEye;
+static Camera viewpoint;
 static GLint shaderProgram;
-static GLint uniformProjection, uniformWireframe, uniformView, uniformLightPos, uniformLit, uniformZoom;
+static GLint uniformProjection, uniformWireframe, uniformLightPos, uniformLit, uniformZoom;
 
 /* OpenGL draw function & timing */
 static void draw(const std::vector<ThreeDimensionalObject> &objects)
@@ -206,11 +205,9 @@ static void draw(const std::vector<ThreeDimensionalObject> &objects)
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 view = cameraHead.getViewMatrix();
-    glm::mat4 projection = cameraEye.getProjectionMatrix();
+    glm::mat4 projection = viewpoint.getViewProjMatrix();
 
     glUseProgram(shaderProgram);
-    glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform1f(uniformZoom, 1);
     glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 10);
@@ -229,17 +226,17 @@ static void animate(void)
     if (input->animate)
         angle = 100.f * (float) glfwGetTime();
     if (input->forward)
-        cameraHead.move(glm::vec3(0, .125, 0));
+        viewpoint.move(glm::vec3(0, .125, 0));
     if (input->backward)
-        cameraHead.move(glm::vec3(0, -.125, 0));
+        viewpoint.move(glm::vec3(0, -.125, 0));
     if (input->left)
-        cameraHead.move(glm::vec3(-.125, 0, 0));
+        viewpoint.move(glm::vec3(-.125, 0, 0));
     if (input->right)
-        cameraHead.move(glm::vec3(.125, 0, 0));
+        viewpoint.move(glm::vec3(.125, 0, 0));
     const MouseInputState* mouse = Input::GetMouseState();
-    cameraHead.theta += mouse->moveX;
-    cameraHead.phi -= mouse->moveY;
-    cameraHead.phi = glm::clamp<GLfloat>(cameraHead.phi, -90, 90);
+    viewpoint.theta += mouse->moveX;
+    viewpoint.phi -= mouse->moveY;
+    viewpoint.phi = glm::clamp<GLfloat>(viewpoint.phi, -90, 90);
 }
 
 static GLint loadShader(FILE* sourceFile, GLint shaderType)
@@ -320,9 +317,8 @@ static bool initShaders()
     glLinkProgram(shaderProgram);
 
     uniformLightPos = glGetUniformLocation(shaderProgram, "lightPos");
-    uniformProjection = glGetUniformLocation(shaderProgram, "projection");
+    uniformProjection = glGetUniformLocation(shaderProgram, "projView");
     uniformModel = glGetUniformLocation(shaderProgram, "model");
-    uniformView = glGetUniformLocation(shaderProgram, "view");
     uniformLit = glGetUniformLocation(shaderProgram, "lit");
     uniformZoom = glGetUniformLocation(shaderProgram, "zoom");
     uniformColour = glGetUniformLocation(shaderProgram, "colour");
@@ -364,7 +360,7 @@ static void init(std::vector<ThreeDimensionalObject> &objects)
 static void onWindowResize(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    cameraEye.onWindowResize(window, width, height);
+    viewpoint.onWindowResize(window, width, height);
 }
 
 /* program entry */

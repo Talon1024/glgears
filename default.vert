@@ -2,9 +2,8 @@
 
 uniform vec3 lightPos;
 uniform vec3 colour;
-uniform mat4 projection;
+uniform mat4 projView;
 uniform mat4 model;
-uniform mat4 view;
 uniform float zoom;
 
 layout(location = 0) in vec3 aPos;
@@ -29,7 +28,7 @@ void main() {
 	float lightIntensity = max(0, dot(lightDiff, vNrm));
 	diffuse = vec4(colour, 1.);
 	lightColour = vec4(vec3(lightIntensity), 1.);
-	vec4 screenPos = projection * view * model * vec4(aPos, 1.);
+	vec4 screenPos = projView * model * vec4(aPos, 1.);
 	distanceFromCamera = screenPos.z;
 	vBary = aBary;
 	screenPos.w *= zoom;

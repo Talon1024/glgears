@@ -71,7 +71,7 @@ static void addTri(GearVertex* buffer,
 
 #define TRIS_PER_QUAD 2
 #define VERTICES_PER_TRI 3
-// Front face, front teeth, back face, back teeth, central hole
+// Top face, top teeth, bottom face, bottom teeth, central hole
 #define MODEL_PIECE_COUNT 5
 
 GearVertex* gear(GLuint& vertexCount, GearBlueprint bp)
