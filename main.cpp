@@ -69,13 +69,7 @@ struct ThreeDimensionalObject {
     float angleAdd;
 
     void draw() const;
-    void setupForDrawing(
-        GLfloat innerRadius,
-        GLfloat outerRadius,
-        GLfloat width,
-        GLint teeth,
-        GLfloat toothDepth
-    );
+    void setupForDrawing(GearBlueprint bp);
 
     static const void* posOffset;
     static const void* nrmOffset;
@@ -107,13 +101,10 @@ void ThreeDimensionalObject::draw() const {
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }
 
-void ThreeDimensionalObject::setupForDrawing(GLfloat innerRadius,
-    GLfloat outerRadius, GLfloat width, GLint teeth, GLfloat toothDepth) {
+void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
 
     // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
     GLuint VBOstride = sizeof(GearVertex);
-
-    GearBlueprint bp {innerRadius, outerRadius, width, teeth, toothDepth};
 
     GearVertex* gearBuffer = gear(vertexCount, bp);
 
@@ -284,25 +275,25 @@ static void init(std::vector<ThreeDimensionalObject> &objects)
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
 
-    objects.push_back(ThreeDimensionalObject {
+    objects.push_back({
         vec3_t {{0.8, 0.1, 0.0}}, // colour
         vec3_t {{-3.0, -2.0, 0.0}} // position
     });
-    objects.back().setupForDrawing(1., 4., 1., 20, 0.7);
+    objects.back().setupForDrawing({1., 4., 1., 20, 0.7});
 
-    objects.push_back(ThreeDimensionalObject {
+    objects.push_back({
         vec3_t {{0., 0.8, 0.2}}, // colour
         vec3_t {{3.1, -2., 0.0}}, // position
         -2.0, -9.0 // angleMultiply, angleAdd
     });
-    objects.back().setupForDrawing(0.5, 2., 2., 10, 0.7);
+    objects.back().setupForDrawing({0.5, 2., 2., 10, 0.7});
 
-    objects.push_back(ThreeDimensionalObject {
+    objects.push_back({
         vec3_t {{0.2, 0.2, 1.}}, // colour
         vec3_t {{-3.1, 4.2, 0.0}}, // position
         -2.0, -25.0 // angleMultiply, angleAdd
     });
-    objects.back().setupForDrawing(1.3, 2., 0.5, 10, 0.7);
+    objects.back().setupForDrawing({1.3, 2., 0.5, 10, 0.7});
 }
 
 static void onWindowResize(GLFWwindow* window, int width, int height)
