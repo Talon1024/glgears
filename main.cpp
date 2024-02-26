@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 #include "glad.h"
 #define GLFW_INCLUDE_NONE
@@ -52,14 +53,70 @@ static GLfloat angle = 0.f;
 
 struct ThreeDimensionalObject {
     private:
+    // OpenGL resource handles
+    GLuint ibo;
     GLuint vbo;
     GLuint vao;
+    // Used for rendering a complete object
     GLuint vertexCount;
 
     public:
-    ThreeDimensionalObject(vec3_t colour, vec3_t position) : colour(colour), position(position), angleMultiply(1.0), angleAdd(0.0) {}
 
-    ThreeDimensionalObject(vec3_t colour, vec3_t position, float angleMultiply, float angleAdd) : colour(colour), position(position), angleMultiply(angleMultiply), angleAdd(angleAdd) {}
+    // Prevent copying! See: https://www.khronos.org/opengl/wiki/Common_Mistakes#RAII_and_hidden_destructor_calls
+    // Also, this class needs a move constructor and a move assignment operator
+    // since this class also has a destructor
+    ThreeDimensionalObject(ThreeDimensionalObject& other) = delete;
+    ThreeDimensionalObject& operator= (ThreeDimensionalObject& other) = delete;
+
+    // Default values for angleMultiply and angleAdd
+    ThreeDimensionalObject(
+        vec3_t colour,
+        vec3_t position
+    ) : colour(colour),
+        position(position),
+        angleMultiply(1.0),
+        angleAdd(0.0) {}
+
+    // Custom values for angleMultiply and angleAdd
+    ThreeDimensionalObject(
+        vec3_t colour,
+        vec3_t position,
+        float angleMultiply,
+        float angleAdd
+    ) : colour(colour),
+        position(position),
+        angleMultiply(angleMultiply),
+        angleAdd(angleAdd) {}
+
+    ThreeDimensionalObject(ThreeDimensionalObject&& other) : ibo(other.ibo),
+        vbo(other.vbo), vao(other.vao), vertexCount(other.vertexCount),
+        colour(other.colour), position(other.position),
+        angleMultiply(other.angleMultiply), angleAdd(other.angleAdd)
+    {
+        other.ibo = 0;
+        other.vbo = 0;
+        other.vao = 0;
+    }
+
+    ThreeDimensionalObject& operator= (ThreeDimensionalObject&& other) {
+        if (this != &other) {
+            ibo = other.ibo; other.ibo = 0;
+            vbo = other.vbo; other.vbo = 0;
+            vao = other.vao; other.vao = 0;
+            vertexCount = other.vertexCount; other.vertexCount = 0;
+            colour = other.colour; other.colour = vec3_t {};
+            position = other.position; other.position = vec3_t {};
+            angleMultiply = other.angleMultiply; other.angleMultiply = 1.0;
+            angleAdd = other.angleAdd; other.angleAdd = 0.0;
+        }
+        return *this;
+    }
+
+    ~ThreeDimensionalObject() {
+        if (ibo) glDeleteBuffers(1, &ibo);
+        if (vbo) glDeleteBuffers(1, &vbo);
+        if (vao) glDeleteVertexArrays(1, &vao);
+    }
 
     // Uniforms
     vec3_t colour;
@@ -96,7 +153,8 @@ void ThreeDimensionalObject::draw() const {
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     glUniform3f(uniformColour, colour.x, colour.y, colour.z);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }
@@ -108,13 +166,19 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
 
     GearVertex* gearBuffer = gear(vertexCount, bp);
 
+    if (vao) glDeleteVertexArrays(1, &vao);
+    if (vbo) glDeleteBuffers(1, &vbo);
+    if (ibo) glDeleteBuffers(1, &ibo);
+
     // Set up buffer and vertex array
     glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ibo);
     glGenVertexArrays(1, &vao);
     // Upload buffer
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GearVertex), gearBuffer, GL_STATIC_DRAW);
-    glBindVertexArray(vao);
     // Set up vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
     glEnableVertexAttribArray(0);
@@ -123,8 +187,9 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VBOstride, colOffset);
     glEnableVertexAttribArray(2);
     // Release bindings
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     // Free buffer, since it has been uploaded already
     delete[] gearBuffer;
 }
@@ -275,24 +340,24 @@ static void init(std::vector<ThreeDimensionalObject> &objects)
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
 
-    objects.push_back({
+    objects.emplace_back(
         vec3_t {{0.8, 0.1, 0.0}}, // colour
         vec3_t {{-3.0, -2.0, 0.0}} // position
-    });
+    );
     objects.back().setupForDrawing({1., 4., 1., 20, 0.7});
 
-    objects.push_back({
+    objects.emplace_back(
         vec3_t {{0., 0.8, 0.2}}, // colour
         vec3_t {{3.1, -2., 0.0}}, // position
         -2.0, -9.0 // angleMultiply, angleAdd
-    });
+    );
     objects.back().setupForDrawing({0.5, 2., 2., 10, 0.7});
 
-    objects.push_back({
+    objects.emplace_back(
         vec3_t {{0.2, 0.2, 1.}}, // colour
         vec3_t {{-3.1, 4.2, 0.0}}, // position
         -2.0, -25.0 // angleMultiply, angleAdd
-    });
+    );
     objects.back().setupForDrawing({1.3, 2., 0.5, 10, 0.7});
 }
 

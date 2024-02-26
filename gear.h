@@ -26,7 +26,7 @@
 #pragma once
 #include "glad.h"
 
-typedef union
+typedef union vec3_t
 {
     float xyz[3];
     float& operator[](unsigned long index)
@@ -40,7 +40,7 @@ typedef union
     };
 } vec3_t;
 
-typedef union
+typedef union vec2_t
 {
     float xy[2];
     float& operator[](unsigned long index)
