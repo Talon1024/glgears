@@ -20,5 +20,5 @@ glad_dep = declare_dependency(
 deplist = [opengl, glfw, glad_dep]
 
 executable('gears',
-	'main.cpp', 'gear.cpp', 'input.cpp', 'camera.cpp',
+	'main.cpp', 'gear.cpp', 'input.cpp', 'camera.cpp', '3dobject.cpp',
 	include_directories: [glm_path, glad_path], dependencies: deplist)
