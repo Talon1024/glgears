@@ -31,11 +31,15 @@ void ThreeDimensionalObject::draw() const {
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     // glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
+    #if INDEX_BUFFERS
     if (indexCount > 0) {
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     } else {
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     }
+    #else
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    #endif
 }
 
 void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
@@ -54,8 +58,9 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ibo);
     glGenVertexArrays(1, &vao);
-    // Upload buffer
+    // Set up vertex array
     glBindVertexArray(vao);
+    // Upload index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
@@ -63,7 +68,7 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
         gearBuffers.indexBuffer.data(),
         GL_STATIC_DRAW
     );
-
+    // Upload vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
