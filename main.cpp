@@ -25,6 +25,7 @@
  */
 
 #include "glm/common.hpp"
+#include "glm/fwd.hpp"
 #include "khrplatform.h"
 #if defined(_MSC_VER)
  // Make MS math.h define M_PI
@@ -68,7 +69,7 @@ static void draw(const std::vector<ThreeDimensionalObject> &objects)
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform1f(uniformZoom, 1);
-    glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 10);
+    glUniform3f(uniformLightPos, sin(glfwGetTime()) * 5., sin(glfwGetTime()) * 5., cos(glfwGetTime()) * 10);
     glUniform1ui(uniformLit, input->lit);
     glUniform1ui(uniformWireframe, input->wireframe);
 
@@ -217,6 +218,10 @@ static void init(std::vector<ThreeDimensionalObject> &objects)
         -2.0, -25.0 // angleMultiply, angleAdd
     );
     objects.back().setupForDrawing({1.3, 2., 0.5, 10, 0.7});
+
+    viewpoint.position = glm::vec3(2.0, -5.0, 3.0);
+    viewpoint.phi = -25.0;
+    viewpoint.theta = -15.0;
 }
 
 static void onWindowResize(GLFWwindow* window, int width, int height)

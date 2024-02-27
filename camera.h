@@ -6,7 +6,6 @@
 // For view and projection matrices
 class Camera {
     private:
-    glm::vec3 _position;
     float aspectRatio;
     float fovy;
 
@@ -14,6 +13,7 @@ class Camera {
     float theta, phi;
     float fov = 100;
     bool orthographic;
+    glm::vec3 position;
 
     void move(glm::vec3 by);
     glm::mat4 getViewMatrix();

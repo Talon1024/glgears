@@ -26,13 +26,13 @@ void Camera::move(glm::vec3 by)
     glm::quat rotation(glm::vec3(radPhi, 0, -radTheta));
     glm::vec3 movement = rotation * by;
     // std::printf("by: %.3f %.3f %.3f, mv: %.3f %.3f %.3f, theta: %.3f, phi: %.3f\n", by.x, by.y, by.z, movement.x, movement.y, movement.z, theta, phi);
-    _position += movement;
+    position += movement;
 }
 
 glm::mat4 Camera::getViewMatrix()
 {
     glm::vec3 direction = fromSpherical(theta, glm::clamp<float>(phi, -89., 89.));
-    return glm::lookAt(_position, _position + direction, glm::vec3(0, 0, 1));
+    return glm::lookAt(position, position + direction, glm::vec3(0, 0, 1));
 }
 
 void Camera::onWindowResize(GLFWwindow *window, int width, int height)
