@@ -278,7 +278,7 @@ GearBuffers gear(GearBlueprint bp)
             {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), width * 0.5f}});
         // Modify normal of next vertex so the inside looks smooth
         // Vertices 3 and 4 -> 2, 3, 4
-        GearVertex* vtx = VBOdata.data() + VBOdata.size() - 3;
+        GearVertex* vtx = VBOdata.data() + VBOdata.size() - 4;
         vtx->nrm.x = -cosf(nextAngle);
         vtx->nrm.y = -sinf(nextAngle);
         vtx += 1;
