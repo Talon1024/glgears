@@ -97,7 +97,7 @@ GearBuffers gear(GearBlueprint bp)
     // Distance from the center to the outside of the tooth
     r2 = outer_radius + tooth_depth / 2.f;
 
-    da = (float) M_PI / teeth / 2.;
+    da = M_PI / teeth / 2.;
 
     // One quad for each piece of the model, and four additional quads for the
     // outward faces of the teeth.
@@ -148,7 +148,6 @@ GearBuffers gear(GearBlueprint bp)
 
     /* draw front sides of teeth */
     // glBegin(GL_QUADS);
-    da = 2.f * (float) M_PI / teeth / 4.f;
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
         addQuad(VBOdata.get() + VBOpos, {{nx, ny, nz}},
@@ -201,7 +200,6 @@ GearBuffers gear(GearBlueprint bp)
 
     /* draw back sides of teeth */
     // glBegin(GL_QUADS);
-    da = 2.f * (float) M_PI / teeth / 4.f;
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
 
