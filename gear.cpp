@@ -122,24 +122,24 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
         addTri(VBOdata.get() + VBOpos, normal,
-            {{r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f}},
-            {{r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f}},
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}}
+            {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
+            {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI;
         addQuad(VBOdata.get() + VBOpos, normal,
-                {{r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f}},
-                {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
-                {{r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), width * 0.5f}},
-                {{r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), width * 0.5f}}
+                {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
+                {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
+                {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), width * 0.5f}},
+                {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
-        glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
-        glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
+        glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
+        glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
         if (i < teeth) {
-            glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
-            glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
+            glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
+            glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f);
         }
         */
     }
@@ -150,16 +150,16 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f}},
-            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f}},
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
-            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f}});
+            {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}},
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
-        glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
-        glVertex3f(r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f);
-        glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
-        glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
+        glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
+        glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f);
+        glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f);
+        glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f);
         */
     }
     // glEnd();
@@ -172,24 +172,24 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
         addTri(VBOdata.get() + VBOpos, normal,
-            {{r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f}},
-            {{r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f}},
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}}
+            {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
+            {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI;
         addQuad(VBOdata.get() + VBOpos, normal,
-                {{r0 * (float) cos(angle + 4 * da), r0 * (float) sin(angle + 4 * da), -width * 0.5f}},
-                {{r1 * (float) cos(angle + 4 * da), r1 * (float) sin(angle + 4 * da), -width * 0.5f}},
-                {{r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f}},
-                {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}}
+                {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), -width * 0.5f}},
+                {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), -width * 0.5f}},
+                {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
+                {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
         );
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
-        glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
-        glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+        glVertex3f(r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f);
+        glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
         if (i < teeth) {
-            glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
-            glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
+            glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f);
+            glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
         }
         */
     }
@@ -201,16 +201,16 @@ GearBuffers gear(GearBlueprint bp)
         angle = i * 2.f * (float) M_PI / teeth;
 
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}},
-            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f}},
-            {{r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f}},
-            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f}});
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}},
+            {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
-        glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
-        glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
-        glVertex3f(r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
-        glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
+        glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f);
+        glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f);
+        glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f);
+        glVertex3f(r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f);
         */
     }
     // glEnd();
@@ -220,57 +220,57 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
         float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
-        // glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
-        // glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
-        u = r2 * (float) cos(angle + da) - r1 * (float) cos(angle);
-        v = r2 * (float) sin(angle + da) - r1 * (float) sin(angle);
+        // glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
+        // glVertex3f(r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f);
+        u = r2 * cosf(angle + da) - r1 * cosf(angle);
+        v = r2 * sinf(angle + da) - r1 * sinf(angle);
         len = (float) sqrt(u * u + v * v);
         u /= len;
         v /= len;
         // glNormal3f(v, -u, 0.0);
-        // glVertex3f(r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f);
-        // glVertex3f(r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f);
+        // glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f);
+        // glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f);
         normal = {{v, -u, 0.0}};
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f}},
-            {{r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f}},
-            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f}},
-            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f}});
+            {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
+            {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}},
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
-        // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
+        // glNormal3f(cosf(angle), sinf(angle), 0.f);
         normal = {{cosf(angle), sinf(angle), 0.0}};
-        // glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f);
-        // glVertex3f(r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f);
+        // glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f);
+        // glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f);
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), width * 0.5f}}, // This line and the next are taken from the previous quad
-            {{r2 * (float) cos(angle + da), r2 * (float) sin(angle + da), -width * 0.5f}},
-            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f}},
-            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f}});
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}}, // This line and the next are taken from the previous quad
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}},
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}},
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
-        u = r1 * (float) cos(angle + 3 * da) - r2 * (float) cos(angle + 2 * da);
-        v = r1 * (float) sin(angle + 3 * da) - r2 * (float) sin(angle + 2 * da);
+        u = r1 * cosf(angle + 3 * da) - r2 * cosf(angle + 2 * da);
+        v = r1 * sinf(angle + 3 * da) - r2 * sinf(angle + 2 * da);
         // glNormal3f(v, -u, 0.f);
         normal = {{v, -u, 0.0}};
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), width * 0.5f}},
-            {{r2 * (float) cos(angle + 2 * da), r2 * (float) sin(angle + 2 * da), -width * 0.5f}},
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}});
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}},
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}},
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
-        // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f);
-        // glVertex3f(r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f);
-        // glNormal3f((float) cos(angle), (float) sin(angle), 0.f);
+        // glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f);
+        // glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f);
+        // glNormal3f(cosf(angle), sinf(angle), 0.f);
         normal = {{cosf(angle), sinf(angle), 0.0}};
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), width * 0.5f}},
-            {{r1 * (float) cos(angle + 3 * da), r1 * (float) sin(angle + 3 * da), -width * 0.5f}},
-            {{r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), width * 0.5f}},
-            {{r1 * (float) cos(nextAngle), r1 * (float) sin(nextAngle), -width * 0.5f}});
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
+            {{r1 * cosf(nextAngle), r1 * sinf(nextAngle), width * 0.5f}},
+            {{r1 * cosf(nextAngle), r1 * sinf(nextAngle), -width * 0.5f}});
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
     }
 
-    // glVertex3f(r1 * (float) cos(0), r1 * (float) sin(0), width * 0.5f);
-    // glVertex3f(r1 * (float) cos(0), r1 * (float) sin(0), -width * 0.5f);
+    // glVertex3f(r1 * cosf(0), r1 * sinf(0), width * 0.5f);
+    // glVertex3f(r1 * cosf(0), r1 * sinf(0), -width * 0.5f);
 
     // glEnd();
 
@@ -281,28 +281,28 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
         float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
-        // glNormal3f(-(float) cos(angle), -(float) sin(angle), 0.f);
+        // glNormal3f(-cosf(angle), -sinf(angle), 0.f);
         normal = {{-cosf(angle), -sinf(angle), 0.0}};
         addQuad(VBOdata.get() + VBOpos, normal,
-            {{r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f}},
-            {{r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f}},
-            {{r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), -width * 0.5f}},
-            {{r0 * (float) cos(nextAngle), r0 * (float) sin(nextAngle), width * 0.5f}});
+            {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
+            {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
+            {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), -width * 0.5f}},
+            {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), width * 0.5f}});
         // Modify normal of next vertex so the inside looks smooth
         // Vertices 3 and 4 -> 2, 3, 4
         GearVertex* vtx = VBOdata.get() + VBOpos + 2;
-        vtx->nrm.x = -(float) cos(nextAngle);
-        vtx->nrm.y = -(float) sin(nextAngle);
+        vtx->nrm.x = -cosf(nextAngle);
+        vtx->nrm.y = -sinf(nextAngle);
         vtx += 1;
         // No need to modify normal Z coordinate
-        vtx->nrm.x = -(float) cos(nextAngle);
-        vtx->nrm.y = -(float) sin(nextAngle);
+        vtx->nrm.x = -cosf(nextAngle);
+        vtx->nrm.y = -sinf(nextAngle);
         vtx += 1;
-        vtx->nrm.x = -(float) cos(nextAngle);
-        vtx->nrm.y = -(float) sin(nextAngle);
+        vtx->nrm.x = -cosf(nextAngle);
+        vtx->nrm.y = -sinf(nextAngle);
         VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
-        // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), -width * 0.5f);
-        // glVertex3f(r0 * (float) cos(angle), r0 * (float) sin(angle), width * 0.5f);
+        // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
+        // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
     }
     // glEnd();
 
