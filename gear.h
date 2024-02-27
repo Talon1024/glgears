@@ -26,7 +26,7 @@
 #pragma once
 #include "glad.h"
 #include "vector.h"
-#include <memory>
+#include <vector>
 
 struct GearVertex {
     // Position
@@ -46,10 +46,8 @@ struct GearBlueprint {
 };
 
 struct GearBuffers {
-    std::unique_ptr<GearVertex[]> vertexBuffer;
-    std::unique_ptr<GLuint[]> indexBuffer;
-    GLuint indexCount;
-    GLuint vertexCount;
+    std::vector<GearVertex> vertexBuffer;
+    std::vector<GLuint> indexBuffer;
 };
 
 GearBuffers gear(GearBlueprint bp);

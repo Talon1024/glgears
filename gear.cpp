@@ -33,22 +33,21 @@
 #include <cmath>
 #include "gear.h"
 #include "vector.h"
-#include <memory>
-#include <utility>
+#include <vector>
 
 // Forward declarations for addVertex/Quad/Tri. These are only used in gear.cpp.
 
-static void addVertex(GearVertex* buffer,
+static void addVertex(std::vector<GearVertex>& buffer,
                       vec3_t v,
                       vec3_t n,
                       vec2_t b);
-static void addQuad(GearVertex* buffer,
+static void addQuad(std::vector<GearVertex>& buffer,
                     vec3_t n,
                     vec3_t v1,
                     vec3_t v2,
                     vec3_t v3,
                     vec3_t v4);
-static void addTri(GearVertex* buffer,
+static void addTri(std::vector<GearVertex>& buffer,
                    vec3_t n,
                    vec3_t v1,
                    vec3_t v2,
@@ -106,9 +105,9 @@ GearBuffers gear(GearBlueprint bp)
     // Two pieces of the gear use "addTri"
     unsigned int extraTriCount = teeth * 2;
     // Number of vertices in the buffer
-    unsigned int vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
-    std::unique_ptr<GearVertex[]> VBOdata {new GearVertex[vertexCount]};
-    std::unique_ptr<GLuint[]> indexData {new GLuint[1]};
+    size_t vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
+    std::vector<GearVertex> VBOdata {vertexCount};
+    std::vector<GLuint> indexData {};
 
     // glShadeModel(GL_FLAT); // flat or smooth shading depends on normals
 
@@ -118,22 +117,19 @@ GearBuffers gear(GearBlueprint bp)
 
     /* draw front face */
     // glBegin(GL_QUAD_STRIP);
-    unsigned int VBOpos = 0;
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
-        addTri(VBOdata.get() + VBOpos, normal,
+        addTri(VBOdata, normal,
             {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
             {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}}
         );
-        VBOpos += VERTICES_PER_TRI;
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
                 {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
                 {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
                 {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), width * 0.5f}},
                 {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), width * 0.5f}}
         );
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
         glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
@@ -149,12 +145,11 @@ GearBuffers gear(GearBlueprint bp)
     // glBegin(GL_QUADS);
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}});
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
         glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f);
@@ -171,19 +166,17 @@ GearBuffers gear(GearBlueprint bp)
     // glBegin(GL_QUAD_STRIP);
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
-        addTri(VBOdata.get() + VBOpos, normal,
+        addTri(VBOdata, normal,
             {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
             {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
         );
-        VBOpos += VERTICES_PER_TRI;
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
                 {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), -width * 0.5f}},
                 {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), -width * 0.5f}},
                 {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
                 {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
         );
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f);
         glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
@@ -200,12 +193,11 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
 
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}},
             {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}});
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         /*
         glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f);
         glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f);
@@ -231,42 +223,38 @@ GearBuffers gear(GearBlueprint bp)
         // glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f);
         // glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f);
         normal = {{v, -u, 0.0}};
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
             {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}},
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}});
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glNormal3f(cosf(angle), sinf(angle), 0.f);
         normal = {{cosf(angle), sinf(angle), 0.0}};
         // glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f);
         // glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f);
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}}, // This line and the next are taken from the previous quad
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}});
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         u = r1 * cosf(angle + 3 * da) - r2 * cosf(angle + 2 * da);
         v = r1 * sinf(angle + 3 * da) - r2 * sinf(angle + 2 * da);
         // glNormal3f(v, -u, 0.f);
         normal = {{v, -u, 0.0}};
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}});
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f);
         // glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f);
         // glNormal3f(cosf(angle), sinf(angle), 0.f);
         normal = {{cosf(angle), sinf(angle), 0.0}};
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
             {{r1 * cosf(nextAngle), r1 * sinf(nextAngle), width * 0.5f}},
             {{r1 * cosf(nextAngle), r1 * sinf(nextAngle), -width * 0.5f}});
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
     }
 
     // glVertex3f(r1 * cosf(0), r1 * sinf(0), width * 0.5f);
@@ -283,14 +271,14 @@ GearBuffers gear(GearBlueprint bp)
         float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
         // glNormal3f(-cosf(angle), -sinf(angle), 0.f);
         normal = {{-cosf(angle), -sinf(angle), 0.0}};
-        addQuad(VBOdata.get() + VBOpos, normal,
+        addQuad(VBOdata, normal,
             {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
             {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
             {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), -width * 0.5f}},
             {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), width * 0.5f}});
         // Modify normal of next vertex so the inside looks smooth
         // Vertices 3 and 4 -> 2, 3, 4
-        GearVertex* vtx = VBOdata.get() + VBOpos + 2;
+        GearVertex* vtx = VBOdata.data() + VBOdata.size() - 3;
         vtx->nrm.x = -cosf(nextAngle);
         vtx->nrm.y = -sinf(nextAngle);
         vtx += 1;
@@ -300,7 +288,6 @@ GearBuffers gear(GearBlueprint bp)
         vtx += 1;
         vtx->nrm.x = -cosf(nextAngle);
         vtx->nrm.y = -sinf(nextAngle);
-        VBOpos += VERTICES_PER_TRI * TRIS_PER_QUAD;
         // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
         // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
     }
@@ -308,57 +295,40 @@ GearBuffers gear(GearBlueprint bp)
 
     // printf("VBOsize and VBOpos: %d %d\n", vertexCount, VBOpos);
 
-    return {std::move(VBOdata), std::move(indexData), 1, vertexCount};
+    return {std::move(VBOdata), std::move(indexData)};
 }
 
 
-static void addVertex(GearVertex* buffer,
+static void addVertex(std::vector<GearVertex>& buffer,
                       vec3_t v,
                       vec3_t n,
                       vec2_t b)
 {
-    buffer->pos = v;
-    buffer->nrm = n;
-    buffer->bary = b;
+    buffer.push_back({v, n, b});
 }
 
-static void addQuad(GearVertex* buffer,
+static void addQuad(std::vector<GearVertex>& buffer,
                     vec3_t n,
                     vec3_t v1,
                     vec3_t v2,
                     vec3_t v3,
                     vec3_t v4)
 {
-    unsigned int pos = 0;
-    /*
-    addVertex(buffer + pos, v1x, v1y, v1z, nx, ny, nz, r, g, b);
-    pos += sizeof(GearVertex);
-    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
-    pos += sizeof(GearVertex);
-    addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
-    pos += sizeof(GearVertex);
-    addVertex(buffer + pos, v3x, v3y, v3z, nx, ny, nz, r, g, b);
-    pos += sizeof(GearVertex);
-    addVertex(buffer + pos, v2x, v2y, v2z, nx, ny, nz, r, g, b);
-    pos += sizeof(GearVertex);
-    addVertex(buffer + pos, v4x, v4y, v4z, nx, ny, nz, r, g, b);
-    */
-    addVertex(buffer + pos, v1, n, {{1., 0.}}); pos += 1;
-    addVertex(buffer + pos, v2, n, {{0., 1.}}); pos += 1;
-    addVertex(buffer + pos, v4, n, {{0., 0.}}); pos += 1;
-    addVertex(buffer + pos, v4, n, {{0., 0.}}); pos += 1;
-    addVertex(buffer + pos, v3, n, {{0., 1.}}); pos += 1;
-    addVertex(buffer + pos, v1, n, {{1., 0.}});
+    addVertex(buffer, v1, n, {{1., 0.}});
+    addVertex(buffer, v2, n, {{0., 1.}});
+    addVertex(buffer, v4, n, {{0., 0.}});
+    addVertex(buffer, v4, n, {{0., 0.}});
+    addVertex(buffer, v3, n, {{0., 1.}});
+    addVertex(buffer, v1, n, {{1., 0.}});
 }
 
-static void addTri(GearVertex* buffer,
+static void addTri(std::vector<GearVertex>& buffer,
                    vec3_t n,
                    vec3_t v1,
                    vec3_t v2,
                    vec3_t v3)
 {
-    unsigned int pos = 0;
-    addVertex(buffer + pos, v1, n, {{1., 0.}}); pos += 1;
-    addVertex(buffer + pos, v2, n, {{0., 1.}}); pos += 1;
-    addVertex(buffer + pos, v3, n, {{0., 0.}});
+    addVertex(buffer, v1, n, {{1., 0.}});
+    addVertex(buffer, v2, n, {{0., 1.}});
+    addVertex(buffer, v3, n, {{0., 0.}});
 }

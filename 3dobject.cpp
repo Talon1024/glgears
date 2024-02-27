@@ -31,7 +31,11 @@ void ThreeDimensionalObject::draw() const {
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     // glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    if (indexCount > 0) {
+        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    }
 }
 
 void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
@@ -40,7 +44,7 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     GLuint VBOstride = sizeof(GearVertex);
 
     GearBuffers gearBuffers = gear(bp);
-	vertexCount = gearBuffers.vertexCount;
+    vertexCount = gearBuffers.vertexBuffer.size();
 
     if (vao) glDeleteVertexArrays(1, &vao);
     if (vbo) glDeleteBuffers(1, &vbo);
@@ -53,10 +57,20 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     // Upload buffer
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, gearBuffers.indexCount * sizeof(GLuint), gearBuffers.indexBuffer.get(), GL_STATIC_DRAW);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        gearBuffers.indexBuffer.size() * sizeof(GLuint),
+        gearBuffers.indexBuffer.data(),
+        GL_STATIC_DRAW
+    );
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GearVertex), gearBuffers.vertexBuffer.get(), GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        gearBuffers.vertexBuffer.size() * sizeof(GearVertex),
+        gearBuffers.vertexBuffer.data(),
+        GL_STATIC_DRAW
+    );
     // Set up vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
     glEnableVertexAttribArray(0);
