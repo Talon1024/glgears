@@ -37,6 +37,19 @@ struct GearVertex {
     vec2_t bary;
 };
 
+// Ensures three indices are always given for each triangle, otherwise you
+// should get a compile error.
+class IndexTriangle {
+    private:
+    GLuint a, b, c;
+
+    public:
+    IndexTriangle() = delete;
+    IndexTriangle(GLuint a) = delete;
+    IndexTriangle(GLuint a, GLuint b) = delete;
+    IndexTriangle(GLuint a, GLuint b, GLuint c) : a(a), b(b), c(c) {}
+};
+
 struct GearBlueprint {
     GLfloat inner_radius;
     GLfloat outer_radius;
@@ -47,7 +60,9 @@ struct GearBlueprint {
 
 struct GearBuffers {
     std::vector<GearVertex> vertexBuffer;
-    std::vector<GLuint> indexBuffer;
+    std::vector<IndexTriangle> indexBuffer;
+    unsigned int vertexCount() { return vertexBuffer.size(); }
+    unsigned int indexCount() { return indexBuffer.size() * 3; }
 };
 
 GearBuffers gear(GearBlueprint bp);

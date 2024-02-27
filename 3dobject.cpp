@@ -1,5 +1,6 @@
 #include "3dobject.h"
 
+#include "gear.h"
 #include "glad.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,15 +32,8 @@ void ThreeDimensionalObject::draw() const {
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     // glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
-    #if INDEX_BUFFERS
-    if (indexCount > 0) {
-        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-    } else {
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-    }
-    #else
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-    #endif
+
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 }
 
 void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
@@ -49,6 +43,7 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
 
     GearBuffers gearBuffers = gear(bp);
     vertexCount = gearBuffers.vertexBuffer.size();
+    indexCount = gearBuffers.indexCount();
 
     if (vao) glDeleteVertexArrays(1, &vao);
     if (vbo) glDeleteBuffers(1, &vbo);
@@ -64,7 +59,7 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        gearBuffers.indexBuffer.size() * sizeof(GLuint),
+        gearBuffers.indexBuffer.size() * sizeof(IndexTriangle),
         gearBuffers.indexBuffer.data(),
         GL_STATIC_DRAW
     );
