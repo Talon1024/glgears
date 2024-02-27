@@ -75,6 +75,7 @@ static void addTri(std::vector<GearVertex>& buffer,
 #define VERTICES_PER_TRI 3
 // Top face, top teeth, bottom face, bottom teeth, central hole
 #define MODEL_PIECE_COUNT 5
+// #define FIRST_TOOTH_ONLY
 
 GearBuffers gear(GearBlueprint bp)
 {
@@ -117,8 +118,15 @@ GearBuffers gear(GearBlueprint bp)
 
     /* draw front face */
     // glBegin(GL_QUAD_STRIP);
+    #ifdef FIRST_TOOTH_ONLY
+    bool first_tooth_added = false;
+    #endif
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
+        #ifdef FIRST_TOOTH_ONLY
+        if (!first_tooth_added) {
+        first_tooth_added = true;
+        #endif
         addTri(VBOdata, normal,
             {{r0 * cosf(angle), r0 * sinf(angle), width * 0.5f}},
             {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
@@ -130,6 +138,9 @@ GearBuffers gear(GearBlueprint bp)
                 {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), width * 0.5f}},
                 {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), width * 0.5f}}
         );
+        #ifdef FIRST_TOOTH_ONLY
+        }
+        #endif
         /*
         glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
         glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
@@ -139,17 +150,27 @@ GearBuffers gear(GearBlueprint bp)
         }
         */
     }
+    #ifdef FIRST_TOOTH_ONLY
+    first_tooth_added = false;
+    #endif
     // glEnd();
 
     /* draw front sides of teeth */
     // glBegin(GL_QUADS);
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
+        #ifdef FIRST_TOOTH_ONLY
+        if (!first_tooth_added) {
+        first_tooth_added = true;
+        #endif
         addQuad(VBOdata, normal,
             {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f}},
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), width * 0.5f}});
+        #ifdef FIRST_TOOTH_ONLY
+        }
+        #endif
         /*
         glVertex3f(r1 * cosf(angle), r1 * sinf(angle), width * 0.5f);
         glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f);
@@ -158,6 +179,9 @@ GearBuffers gear(GearBlueprint bp)
         */
     }
     // glEnd();
+    #ifdef FIRST_TOOTH_ONLY
+    first_tooth_added = false;
+    #endif
 
     // glNormal3f(0.0, 0.0, -1.0);
     normal.z = -1.;
@@ -166,6 +190,10 @@ GearBuffers gear(GearBlueprint bp)
     // glBegin(GL_QUAD_STRIP);
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
+        #ifdef FIRST_TOOTH_ONLY
+        if (!first_tooth_added) {
+        first_tooth_added = true;
+        #endif
         addTri(VBOdata, normal,
             {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
             {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
@@ -177,6 +205,9 @@ GearBuffers gear(GearBlueprint bp)
                 {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
                 {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
         );
+        #ifdef FIRST_TOOTH_ONLY
+        }
+        #endif
         /*
         glVertex3f(r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f);
         glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
@@ -187,17 +218,27 @@ GearBuffers gear(GearBlueprint bp)
         */
     }
     // glEnd();
+    #ifdef FIRST_TOOTH_ONLY
+    first_tooth_added = false;
+    #endif
 
     /* draw back sides of teeth */
     // glBegin(GL_QUADS);
     for (i = 0; i < teeth; i++) {
         angle = i * 2.f * (float) M_PI / teeth;
 
+        #ifdef FIRST_TOOTH_ONLY
+        if (!first_tooth_added) {
+        first_tooth_added = true;
+        #endif
         addQuad(VBOdata, normal,
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
             {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}},
             {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
             {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}});
+        #ifdef FIRST_TOOTH_ONLY
+        }
+        #endif
         /*
         glVertex3f(r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f);
         glVertex3f(r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f);
@@ -206,6 +247,9 @@ GearBuffers gear(GearBlueprint bp)
         */
     }
     // glEnd();
+    #ifdef FIRST_TOOTH_ONLY
+    first_tooth_added = false;
+    #endif
 
     /* draw outward faces of teeth */
     // glBegin(GL_QUAD_STRIP);
@@ -222,6 +266,10 @@ GearBuffers gear(GearBlueprint bp)
         // glNormal3f(v, -u, 0.0);
         // glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), width * 0.5f);
         // glVertex3f(r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f);
+        #ifdef FIRST_TOOTH_ONLY
+        if (!first_tooth_added) {
+        first_tooth_added = true;
+        #endif
         normal = {{v, -u, 0.0}};
         addQuad(VBOdata, normal,
             {{r1 * cosf(angle), r1 * sinf(angle), width * 0.5f}},
@@ -255,12 +303,18 @@ GearBuffers gear(GearBlueprint bp)
             {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
             {{r1 * cosf(nextAngle), r1 * sinf(nextAngle), width * 0.5f}},
             {{r1 * cosf(nextAngle), r1 * sinf(nextAngle), -width * 0.5f}});
+        #ifdef FIRST_TOOTH_ONLY
+        }
+        #endif
     }
 
     // glVertex3f(r1 * cosf(0), r1 * sinf(0), width * 0.5f);
     // glVertex3f(r1 * cosf(0), r1 * sinf(0), -width * 0.5f);
 
     // glEnd();
+    #ifdef FIRST_TOOTH_ONLY
+    first_tooth_added = false;
+    #endif
 
     // glShadeModel(GL_SMOOTH);
 
@@ -270,6 +324,11 @@ GearBuffers gear(GearBlueprint bp)
         angle = i * 2.f * (float) M_PI / teeth;
         float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
         // glNormal3f(-cosf(angle), -sinf(angle), 0.f);
+
+        #ifdef FIRST_TOOTH_ONLY
+        if (!first_tooth_added) {
+        first_tooth_added = true;
+        #endif
         normal = {{-cosf(angle), -sinf(angle), 0.0}};
         addQuad(VBOdata, normal,
             {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
@@ -277,21 +336,27 @@ GearBuffers gear(GearBlueprint bp)
             {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), -width * 0.5f}},
             {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), width * 0.5f}});
         // Modify normal of next vertex so the inside looks smooth
-        // Vertices 3 and 4 -> 2, 3, 4
+        // I need to modify vertices 3 and 4, but vertex 4 is added twice.
+        // Also, no need to modify normal Z coordinate, since it's already 0
         GearVertex* vtx = VBOdata.data() + VBOdata.size() - 4;
         vtx->nrm.x = -cosf(nextAngle);
         vtx->nrm.y = -sinf(nextAngle);
         vtx += 1;
-        // No need to modify normal Z coordinate
         vtx->nrm.x = -cosf(nextAngle);
         vtx->nrm.y = -sinf(nextAngle);
         vtx += 1;
         vtx->nrm.x = -cosf(nextAngle);
         vtx->nrm.y = -sinf(nextAngle);
+        #ifdef FIRST_TOOTH_ONLY
+        }
+        #endif
         // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
         // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
     }
     // glEnd();
+    #ifdef FIRST_TOOTH_ONLY
+    first_tooth_added = false;
+    #endif
 
     // printf("VBOsize and VBOpos: %d %d\n", vertexCount, VBOpos);
 
