@@ -10,6 +10,8 @@ struct KeyInputState {
     bool turnright;
     bool right;
     bool shift;
+    bool up;
+    bool down;
     // Program state (toggles)
     bool wireframe;
     bool lit;

@@ -10,6 +10,8 @@ static KeyInputState curKeyState {
     false, // bool turnright;
     false, // bool right;
     false, // bool shift;
+    false, // bool up;
+    false, // bool down;
     // Program state (toggles)
     false, // bool wireframe;
     true, // bool lit;
@@ -47,6 +49,12 @@ void Input::onKeyAction( GLFWwindow* window, int k, int s, int action, int mods 
         break;
     case GLFW_KEY_RIGHT:
         curKeyState.turnright = on;
+        break;
+    case GLFW_KEY_Q:
+        curKeyState.up = on;
+        break;
+    case GLFW_KEY_Z:
+        curKeyState.down = on;
         break;
     case GLFW_KEY_LEFT_SHIFT:
     case GLFW_KEY_RIGHT_SHIFT:

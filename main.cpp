@@ -91,6 +91,10 @@ static void animate(void)
         viewpoint.move(glm::vec3(-.125, 0, 0));
     if (input->right)
         viewpoint.move(glm::vec3(.125, 0, 0));
+    if (input->up)
+        viewpoint.move(glm::vec3(0, 0, .125));
+    if (input->down)
+        viewpoint.move(glm::vec3(0, 0, -.125));
     const MouseInputState* mouse = Input::GetMouseState();
     viewpoint.theta += mouse->moveX;
     viewpoint.phi -= mouse->moveY;
