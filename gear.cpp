@@ -37,12 +37,6 @@
 
 // Forward declarations for addQuad/Tri. These are only used in gear.cpp.
 
-static void addQuad(
-    std::vector<GearVertex>& buffer,
-    vec3_t n,
-    vec3_t v1, vec3_t v2,
-    vec3_t v3, vec3_t v4
-);
 static void addIndexedQuad(
     std::vector<GearVertex>& geom,
     std::vector<IndexTriangle>& index,
@@ -51,11 +45,6 @@ static void addIndexedQuad(
     vec3_t v1, vec3_t v2,
     vec3_t v3, vec3_t v4
 );
-static void addTri(std::vector<GearVertex>& buffer,
-                   vec3_t n,
-                   vec3_t v1,
-                   vec3_t v2,
-                   vec3_t v3);
 
 /**
     Generate geometry for a gear. Returns an interleaved vertex buffer with these
@@ -127,8 +116,6 @@ GearBuffers gear(GearBlueprint bp)
     bool first_tooth_added = false;
     #endif
     for (i = 0; i < teeth; i++) {
-        bool first = i == 0;
-        bool last = i == (teeth - 1);
         angle = i * 2.f * (float) M_PI / teeth;
         currentIndexStart = buff.vertexCount();
         #ifdef FIRST_TOOTH_ONLY
@@ -392,21 +379,6 @@ GearBuffers gear(GearBlueprint bp)
     return buff;
 }
 
-static void addQuad(std::vector<GearVertex>& buffer,
-                    vec3_t n,
-                    vec3_t v1,
-                    vec3_t v2,
-                    vec3_t v3,
-                    vec3_t v4)
-{
-    buffer.push_back({v1, n, {{1., 0.}}});
-    buffer.push_back({v2, n, {{0., 1.}}});
-    buffer.push_back({v4, n, {{0., 0.}}});
-    buffer.push_back({v4, n, {{0., 0.}}});
-    buffer.push_back({v3, n, {{0., 1.}}});
-    buffer.push_back({v1, n, {{1., 0.}}});
-}
-
 static void addIndexedQuad(std::vector<GearVertex>& geom,
                     std::vector<IndexTriangle>& index,
                     unsigned int indexStart,
@@ -422,15 +394,4 @@ static void addIndexedQuad(std::vector<GearVertex>& geom,
     geom.push_back({v4, n, {{0., 0.}}});
     index.push_back({indexStart + 0, indexStart + 1, indexStart + 3});
     index.push_back({indexStart + 3, indexStart + 2, indexStart + 0});
-}
-
-static void addTri(std::vector<GearVertex>& buffer,
-                   vec3_t n,
-                   vec3_t v1,
-                   vec3_t v2,
-                   vec3_t v3)
-{
-    buffer.push_back({v1, n, {{1., 0.}}});
-    buffer.push_back({v2, n, {{0., 1.}}});
-    buffer.push_back({v3, n, {{0., 0.}}});
 }
