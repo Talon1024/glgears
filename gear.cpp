@@ -127,6 +127,7 @@ GearBuffers gear(GearBlueprint bp)
     bool first_tooth_added = false;
     #endif
     for (i = 0; i < teeth; i++) {
+        bool first = i == 0;
         bool last = i == (teeth - 1);
         angle = i * 2.f * (float) M_PI / teeth;
         currentIndexStart = buff.vertexCount();
@@ -191,23 +192,57 @@ GearBuffers gear(GearBlueprint bp)
         if (!first_tooth_added) {
         first_tooth_added = true;
         #endif
-        addTri(buff.vertexBuffer, normal,
-            {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
-            {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
-            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
-        );
-        addQuad(buff.vertexBuffer, normal,
-                {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), -width * 0.5f}},
-                {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), -width * 0.5f}},
-                {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
-                {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}
-        );
+        currentIndexStart = buff.vertexCount();
+        // addTri(buff.vertexBuffer, normal,
+            // {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}}, // 2
+            // {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}}, // 4
+            // {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}} // 0
+        // );
+        // addQuad(buff.vertexBuffer, normal,
+            // {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), -width * 0.5f}}, // 5
+            // {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), -width * 0.5f}}, // 6
+            // {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}}, // 4
+            // {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}} // 0
+        // );
         /* draw back sides of teeth */
-        addQuad(buff.vertexBuffer, normal,
-            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}},
-            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}},
-            {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}},
-            {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}});
+        addIndexedQuad(
+            buff.vertexBuffer, buff.indexBuffer,
+            buff.vertexCount(), normal,
+            {{r1 * cosf(angle + 3 * da), r1 * sinf(angle + 3 * da), -width * 0.5f}}, // 0
+            {{r2 * cosf(angle + 2 * da), r2 * sinf(angle + 2 * da), -width * 0.5f}}, // 1
+            {{r1 * cosf(angle), r1 * sinf(angle), -width * 0.5f}}, // 2
+            {{r2 * cosf(angle + da), r2 * sinf(angle + da), -width * 0.5f}} // 3
+        );
+        buff.vertexBuffer.push_back({
+            {{r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f}},
+            normal,
+            {{0., 0.}}
+        });
+        buff.vertexBuffer.push_back({
+            {{r0 * cosf(angle + 4 * da), r0 * sinf(angle + 4 * da), -width * 0.5f}},
+            normal,
+            {{0., 1.}}
+        });
+        buff.vertexBuffer.push_back({
+            {{r1 * cosf(angle + 4 * da), r1 * sinf(angle + 4 * da), -width * 0.5f}},
+            normal,
+            {{0., 0.}}
+        });
+        buff.indexBuffer.push_back({
+            currentIndexStart + 2,
+            currentIndexStart + 4,
+            currentIndexStart
+        });
+        buff.indexBuffer.push_back({
+            currentIndexStart + 5,
+            currentIndexStart + 6,
+            currentIndexStart + 4
+        });
+        buff.indexBuffer.push_back({
+            currentIndexStart,
+            currentIndexStart + 4,
+            currentIndexStart + 6
+        });
         #ifdef FIRST_TOOTH_ONLY
         }
         #endif
@@ -279,6 +314,9 @@ GearBuffers gear(GearBlueprint bp)
 
     /* draw inside radius cylinder */
     for (i = 0; i < teeth; i++) {
+        bool first = i == 0;
+        if (first) { circleIndexStart = buff.vertexCount(); }
+        bool last = (teeth - 1) == 1;
         angle = i * 2.f * (float) M_PI / teeth;
         float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
 
@@ -306,17 +344,20 @@ GearBuffers gear(GearBlueprint bp)
             vtx->nrm.x = -cosf(nextAngle);
             vtx->nrm.y = -sinf(nextAngle);
             inside_first = true;
-        } else {
+        } else if (!last) {
             // Add two vertices and quad indices
+            bool odd = i % 2 == 0;
+            vec2_t bara; bara.x = odd ? 1. : 0.; bara.y = 0.;
+            vec2_t barb; barb.x = 0.; barb.y = !odd ? 1. : 0.;
             buff.vertexBuffer.push_back({
                 {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), -width * 0.5f}},
                 normal,
-                {{1., 0.}}
+                bara,
             });
             buff.vertexBuffer.push_back({
                 {{r0 * cosf(nextAngle), r0 * sinf(nextAngle), width * 0.5f}},
                 normal,
-                {{0., 0.}}
+                barb
             });
             buff.indexBuffer.push_back({
                 buff.vertexCount() - 1,
@@ -328,19 +369,25 @@ GearBuffers gear(GearBlueprint bp)
                 buff.vertexCount() - 3,
                 buff.vertexCount() - 2,
             });
+        } else {
+            buff.indexBuffer.push_back({
+                buff.vertexCount() - 1,
+                buff.vertexCount() - 2,
+                circleIndexStart,
+            });
+            buff.indexBuffer.push_back({
+                buff.vertexCount() - 2,
+                circleIndexStart,
+                circleIndexStart + 1,
+            });
         }
         #ifdef FIRST_TOOTH_ONLY
         }
         #endif
-        // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), -width * 0.5f);
-        // glVertex3f(r0 * cosf(angle), r0 * sinf(angle), width * 0.5f);
     }
-    // glEnd();
     #ifdef FIRST_TOOTH_ONLY
     first_tooth_added = false;
     #endif
-
-    // printf("VBOsize and VBOpos: %d %d\n", vertexCount, VBOpos);
 
     return buff;
 }
