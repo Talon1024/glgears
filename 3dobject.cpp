@@ -42,7 +42,6 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     GLuint VBOstride = sizeof(GearVertex);
 
     GearBuffers gearBuffers = gear(bp);
-    vertexCount = gearBuffers.vertexBuffer.size();
     indexCount = gearBuffers.indexCount();
 
     if (vao) glDeleteVertexArrays(1, &vao);

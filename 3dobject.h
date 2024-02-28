@@ -11,7 +11,6 @@ struct ThreeDimensionalObject {
     GLuint vbo;
     GLuint vao;
     // Used for rendering a complete object
-    GLuint vertexCount;
     GLuint indexCount;
 
     public:
@@ -43,7 +42,7 @@ struct ThreeDimensionalObject {
         angleAdd(angleAdd) {}
 
     ThreeDimensionalObject(ThreeDimensionalObject&& other) : ibo(other.ibo),
-        vbo(other.vbo), vao(other.vao), vertexCount(other.vertexCount),
+        vbo(other.vbo), vao(other.vao),
         indexCount(other.indexCount), colour(other.colour),
         position(other.position), angleMultiply(other.angleMultiply),
         angleAdd(other.angleAdd)
@@ -59,7 +58,6 @@ struct ThreeDimensionalObject {
             vbo = other.vbo; other.vbo = 0;
             vao = other.vao; other.vao = 0;
             indexCount = other.indexCount; other.indexCount = 0;
-            vertexCount = other.vertexCount; other.vertexCount = 0;
             colour = other.colour; other.colour = vec3_t {};
             position = other.position; other.position = vec3_t {};
             angleMultiply = other.angleMultiply; other.angleMultiply = 1.0;
