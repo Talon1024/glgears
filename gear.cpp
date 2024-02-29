@@ -303,7 +303,7 @@ GearBuffers gear(GearBlueprint bp)
     for (i = 0; i < teeth; i++) {
         bool first = i == 0;
         if (first) { circleIndexStart = buff.vertexCount(); }
-        bool last = (teeth - 1) == 1;
+        bool last = (teeth - 1) == i;
         angle = i * 2.f * (float) M_PI / teeth;
         float nextAngle = (i + 1) * 2.f * (float) M_PI / teeth;
 
@@ -358,13 +358,13 @@ GearBuffers gear(GearBlueprint bp)
             });
         } else {
             buff.indexBuffer.push_back({
-                buff.vertexCount() - 1,
-                buff.vertexCount() - 2,
                 circleIndexStart,
+                buff.vertexCount() - 2,
+                buff.vertexCount() - 1,
             });
             buff.indexBuffer.push_back({
-                buff.vertexCount() - 2,
                 circleIndexStart,
+                buff.vertexCount() - 1,
                 circleIndexStart + 1,
             });
         }
