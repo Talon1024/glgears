@@ -35,6 +35,15 @@
 #include "vector.h"
 #include <vector>
 
+// Interleaved buffers - useful for checking for duplicates whilst constructing
+// the geometry.
+struct GearBuffersInterleaved {
+    std::vector<GearVertex> vertexBuffer;
+    std::vector<IndexTriangle> indexBuffer;
+    unsigned int vertexCount() { return vertexBuffer.size(); }
+    unsigned int indexCount() { return indexBuffer.size() * 3; }
+};
+
 // Forward declarations for addQuad/Tri. These are only used in gear.cpp.
 
 static void addIndexedQuad(
@@ -70,7 +79,7 @@ static void addIndexedQuad(
 #define MODEL_PIECE_COUNT 5
 // #define FIRST_TOOTH_ONLY
 
-GearBuffers gear(GearBlueprint bp)
+GearBuffersSeparate gear(GearBlueprint bp)
 {
     GLint i;
     GLfloat r0, r1, r2;
@@ -99,7 +108,7 @@ GearBuffers gear(GearBlueprint bp)
     // unsigned int extraTriCount = teeth * 2;
     // Number of vertices in the buffer
     // size_t vertexCount = (quadCount * TRIS_PER_QUAD + extraTriCount) * VERTICES_PER_TRI;
-    GearBuffers buff {
+    GearBuffersInterleaved buff {
         std::vector<GearVertex> {},
         std::vector<IndexTriangle> {}
     };
@@ -325,11 +334,11 @@ GearBuffers gear(GearBlueprint bp)
             // I need to modify vertices 3 and 4.
             // Also, no need to modify normal Z coordinate, since it's already 0
             GearVertex* vtx = buff.vertexBuffer.data() + buff.vertexCount() - 2;
-            vtx->nrm.x = -cosf(nextAngle);
-            vtx->nrm.y = -sinf(nextAngle);
+            vtx->nrm.x = -cosf(angle);
+            vtx->nrm.y = -sinf(angle);
             vtx += 1;
-            vtx->nrm.x = -cosf(nextAngle);
-            vtx->nrm.y = -sinf(nextAngle);
+            vtx->nrm.x = -cosf(angle);
+            vtx->nrm.y = -sinf(angle);
             inside_first = true;
         } else if (!last) {
             // Add two vertices and quad indices
@@ -376,7 +385,21 @@ GearBuffers gear(GearBlueprint bp)
     first_tooth_added = false;
     #endif
 
-    return buff;
+    GearBuffersSeparate buff2 {};
+    // Only the index count is used in draw calls if the index buffer exists
+    // buff2.vertexCount = buff.vertexCount();
+    for (const GearVertex &gv : buff.vertexBuffer) {
+        buff2.pos.push_back(gv.pos);
+        buff2.nrm.push_back(gv.nrm);
+        buff2.bary.push_back(gv.bary);
+    }
+    for (const IndexTriangle &itri : buff.indexBuffer) {
+        buff2.indices.push_back(itri.a);
+        buff2.indices.push_back(itri.b);
+        buff2.indices.push_back(itri.c);
+    }
+
+    return buff2;
 }
 
 static void addIndexedQuad(std::vector<GearVertex>& geom,

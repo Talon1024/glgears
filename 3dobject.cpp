@@ -37,12 +37,8 @@ void ThreeDimensionalObject::draw() const {
 }
 
 void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
-
-    // Stride (total number of bytes for all vertex attributes in an interleaved buffer)
-    GLuint VBOstride = sizeof(GearVertex);
-
-    GearBuffers gearBuffers = gear(bp);
-    indexCount = gearBuffers.indexCount();
+    GearBuffersSeparate gearBuffers = gear(bp);
+    indexCount = gearBuffers.indices.size();
 
     if (vao) glDeleteVertexArrays(1, &vao);
     if (vbo) glDeleteBuffers(1, &vbo);
@@ -58,25 +54,55 @@ void ThreeDimensionalObject::setupForDrawing(GearBlueprint bp) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        gearBuffers.indexBuffer.size() * sizeof(IndexTriangle),
-        gearBuffers.indexBuffer.data(),
+        gearBuffers.indices.size() * sizeof(unsigned int),
+        gearBuffers.indices.data(),
         GL_STATIC_DRAW
     );
     // Upload vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        gearBuffers.vertexBuffer.size() * sizeof(GearVertex),
-        gearBuffers.vertexBuffer.data(),
+        gearBuffers.totalSize(),
+        nullptr,
         GL_STATIC_DRAW
     );
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        0,
+        gearBuffers.pos.size() * sizeof(vec3_t),
+        gearBuffers.pos.data()
+    );
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        gearBuffers.pos.size() * sizeof(vec3_t),
+        gearBuffers.nrm.size() * sizeof(vec3_t),
+        gearBuffers.nrm.data()
+    );
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        gearBuffers.pos.size() * sizeof(vec3_t) +
+        gearBuffers.nrm.size() * sizeof(vec3_t),
+        gearBuffers.bary.size() * sizeof(vec2_t),
+        gearBuffers.bary.data()
+    );
     // Set up vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VBOstride, posOffset);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VBOstride, nrmOffset);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VBOstride, colOffset);
-    glEnableVertexAttribArray(2);
+    {
+        size_t offset = 0;
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), (void*) offset);
+        glEnableVertexAttribArray(0);
+    }
+    {
+        size_t offset = gearBuffers.pos.size() * sizeof(vec3_t);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), (void*) offset);
+        glEnableVertexAttribArray(1);
+    }
+    {
+        size_t offset =
+            gearBuffers.pos.size() * sizeof(vec3_t) +
+            gearBuffers.nrm.size() * sizeof(vec3_t);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vec2_t), (void*) offset);
+        glEnableVertexAttribArray(2);
+    }
     // Release bindings
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

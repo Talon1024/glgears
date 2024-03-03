@@ -40,10 +40,8 @@ struct GearVertex {
 // Ensures three indices are always given for each triangle, otherwise you
 // should get a compile error.
 class IndexTriangle {
-    private:
-    GLuint a, b, c;
-
     public:
+    GLuint a, b, c;
     IndexTriangle() = delete;
     IndexTriangle(GLuint a) = delete;
     IndexTriangle(GLuint a, GLuint b) = delete;
@@ -58,11 +56,17 @@ struct GearBlueprint {
     GLfloat tooth_depth;
 };
 
-struct GearBuffers {
-    std::vector<GearVertex> vertexBuffer;
-    std::vector<IndexTriangle> indexBuffer;
-    unsigned int vertexCount() { return vertexBuffer.size(); }
-    unsigned int indexCount() { return indexBuffer.size() * 3; }
+struct GearBuffersSeparate {
+    std::vector<vec3_t> pos;
+    std::vector<vec3_t> nrm;
+    std::vector<vec2_t> bary;
+    std::vector<unsigned int> indices;
+    std::size_t totalSize() {
+        return
+            sizeof(vec3_t) * pos.size() +
+            sizeof(vec3_t) * nrm.size() +
+            sizeof(vec2_t) * bary.size();
+    }
 };
 
-GearBuffers gear(GearBlueprint bp);
+GearBuffersSeparate gear(GearBlueprint bp);

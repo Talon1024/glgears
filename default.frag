@@ -26,7 +26,7 @@ void main() {
 	if (!wireframe) {
 		FragColor = mix(grayShade, lightColour, float(lit)) * diffuse;
 	} else {
-		FragColor.rg = vBary;
-		// FragColor.rgb = (1.0 - gridFactor(vBary, 0.5, 0.5)) * float(wireframe);
+		FragColor.rg = vBary * step(0.75, max(vBary.x, vBary.y));
+		FragColor.rgb += (1.0 - gridFactor(vBary, 0.5, 0.5)) * float(wireframe);
 	}
 }
