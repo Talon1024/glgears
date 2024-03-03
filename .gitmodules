@@ -1,3 +1,6 @@
 [submodule "glm"]
 	path = glm
 	url = https://github.com/g-truc/glm
+[submodule "subprojects/bgfx"]
+	path = subprojects/bgfx
+	url = https://github.com/JustEnoughMod/bgfx.meson.git
